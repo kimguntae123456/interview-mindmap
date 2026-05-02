@@ -1243,8 +1243,23 @@ window.MMGist = (function () {
     gistUrl() { const id = getGistId(); return id ? 'https://gist.github.com/' + id : ''; }
   };
 })();
-// 자동 시작 (토큰 있으면)
-window.addEventListener('load', () => { try { MMGist.init(); } catch(e){} });
+// 자동 시작 (토큰 있으면) — 여러 진입점에서 모두 트리거
+function _mmGistBoot(){ try { MMGist.init(); } catch(e){} }
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+  setTimeout(_mmGistBoot, 0);
+} else {
+  document.addEventListener('DOMContentLoaded', _mmGistBoot, { once: true });
+  window.addEventListener('load', _mmGistBoot, { once: true });
+}
+// bfcache 복귀 시에도 재시도
+window.addEventListener('pageshow', (e) => { if (MMGist.getToken() && MMGist.getStatus() === 'offline') _mmGistBoot(); });
+// 화면 복귀 시 한 번 풀
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && MMGist.getToken()) {
+    if (MMGist.getStatus() === 'offline') _mmGistBoot();
+    else MMGist.pullNow().catch(()=>{});
+  }
+});
 </script>
 
 <script type="text/babel">
@@ -2421,6 +2436,12 @@ function SyncIndicator() {
   const [err, setErr] = React.useState(MMGist.getError());
   const [open, setOpen] = React.useState(false);
   React.useEffect(() => MMGist.subscribe((s, e) => { setStatus(s); setErr(e); }), []);
+  // 안전망: 마운트 시점에 토큰은 있는데 init이 아직 안 돌았다면 강제 시작
+  React.useEffect(() => {
+    if (MMGist.getToken() && MMGist.getStatus() === 'offline') {
+      try { MMGist.init(); } catch(e){}
+    }
+  }, []);
   React.useEffect(() => {
     const onPull = () => { /* trigger UI refresh */ window.location.reload(); };
     window.addEventListener('mm-gist-pulled', onPull);
