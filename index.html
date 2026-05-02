@@ -1101,6 +1101,152 @@ window.MMLayout = (function () {
 })();
 </script>
 
+<script>
+// ─── gist-sync.js — GitHub Gist 자동 동기화 ───
+window.MMGist = (function () {
+  const TOKEN_KEY = 'mm-gist-token';
+  const GIST_ID_KEY = 'mm-gist-id';
+  const LAST_SYNC_KEY = 'mm-gist-last-sync';
+  const FILENAME = 'mindmap-data.json';
+  const STORE_KEYS = ['mindmap-v6', 'mm-episode-star', 'mm-node-sizes', 'mm-theme'];
+
+  const listeners = new Set();
+  let status = 'offline'; // offline | idle | uploading | downloading | error
+  let lastError = null;
+  let pendingTimer = null;
+  let initialPullDone = false;
+
+  function emit() { listeners.forEach(fn => { try { fn(status, lastError); } catch(e){} }); }
+  function setStatus(s, err) { status = s; lastError = err || null; emit(); }
+
+  function getToken() { try { return localStorage.getItem(TOKEN_KEY) || ''; } catch(e) { return ''; } }
+  function setToken(t) { localStorage.setItem(TOKEN_KEY, (t||'').trim()); }
+  function getGistId() { try { return localStorage.getItem(GIST_ID_KEY) || ''; } catch(e) { return ''; } }
+  function setGistId(id) { localStorage.setItem(GIST_ID_KEY, id); }
+  function clearAll() {
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(GIST_ID_KEY);
+    localStorage.removeItem(LAST_SYNC_KEY);
+    setStatus('offline');
+  }
+
+  function gather() {
+    const data = { v: 1, ts: Date.now(), items: {} };
+    STORE_KEYS.forEach(k => { const v = localStorage.getItem(k); if (v != null) data.items[k] = v; });
+    return data;
+  }
+  function apply(d) {
+    if (!d || !d.items) return false;
+    Object.keys(d.items).forEach(k => { try { localStorage.setItem(k, d.items[k]); } catch(e){} });
+    return true;
+  }
+
+  async function api(path, method, body) {
+    const tok = getToken();
+    if (!tok) throw new Error('토큰이 없습니다');
+    const res = await fetch('https://api.github.com' + path, {
+      method,
+      headers: {
+        Authorization: 'Bearer ' + tok,
+        Accept: 'application/vnd.github+json',
+        'Content-Type': 'application/json',
+        'X-GitHub-Api-Version': '2022-11-28'
+      },
+      body: body ? JSON.stringify(body) : undefined
+    });
+    if (!res.ok) {
+      let msg = res.status + '';
+      try { const j = await res.json(); msg += ' ' + (j.message || ''); } catch(e){}
+      throw new Error(msg);
+    }
+    return res.json();
+  }
+
+  async function createGist() {
+    const data = gather();
+    const r = await api('/gists', 'POST', {
+      description: '면접 마인드맵 — 자동 동기화 (do not edit)',
+      public: false,
+      files: { [FILENAME]: { content: JSON.stringify(data, null, 2) } }
+    });
+    setGistId(r.id);
+    localStorage.setItem(LAST_SYNC_KEY, r.updated_at);
+    return r;
+  }
+
+  async function pushNow() {
+    const tok = getToken(); if (!tok) { setStatus('offline'); return; }
+    setStatus('uploading');
+    try {
+      let id = getGistId();
+      if (!id) { await createGist(); setStatus('idle'); return; }
+      const data = gather();
+      const r = await api('/gists/' + id, 'PATCH', {
+        files: { [FILENAME]: { content: JSON.stringify(data, null, 2) } }
+      });
+      localStorage.setItem(LAST_SYNC_KEY, r.updated_at);
+      setStatus('idle');
+    } catch (e) { setStatus('error', e.message); throw e; }
+  }
+
+  function pushDebounced() {
+    if (!getToken()) return;
+    clearTimeout(pendingTimer);
+    pendingTimer = setTimeout(() => { pushNow().catch(()=>{}); }, 5000);
+  }
+
+  async function pullNow(force) {
+    const tok = getToken(); if (!tok) { setStatus('offline'); return { applied:false }; }
+    const id = getGistId(); if (!id) { setStatus('idle'); return { applied:false, reason:'no-gist' }; }
+    setStatus('downloading');
+    try {
+      const r = await api('/gists/' + id, 'GET');
+      const file = r.files && r.files[FILENAME];
+      if (!file) { setStatus('idle'); return { applied:false, reason:'no-file' }; }
+      const content = file.content || (file.truncated && file.raw_url ? await (await fetch(file.raw_url)).text() : '');
+      const data = JSON.parse(content);
+      const lastSync = localStorage.getItem(LAST_SYNC_KEY) || '';
+      if (force || r.updated_at > lastSync) {
+        apply(data);
+        localStorage.setItem(LAST_SYNC_KEY, r.updated_at);
+        setStatus('idle');
+        return { applied:true, ts: r.updated_at };
+      }
+      setStatus('idle');
+      return { applied:false, ts: r.updated_at };
+    } catch (e) { setStatus('error', e.message); return { applied:false, error:e.message }; }
+  }
+
+  async function init() {
+    if (!getToken()) { setStatus('offline'); return; }
+    setStatus('idle');
+    // hook into save events
+    window.addEventListener('mm-saved', pushDebounced);
+    if (window.MMStars && MMStars.subscribe) MMStars.subscribe(pushDebounced);
+    window.addEventListener('mm-theme-change', pushDebounced);
+    // initial pull
+    if (!initialPullDone) {
+      initialPullDone = true;
+      const res = await pullNow();
+      if (res && res.applied) {
+        window.dispatchEvent(new CustomEvent('mm-gist-pulled'));
+      }
+    }
+  }
+
+  return {
+    getStatus: () => status,
+    getError: () => lastError,
+    subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); },
+    getToken, setToken, getGistId, setGistId, clearAll,
+    pushNow, pullNow, init,
+    gistUrl() { const id = getGistId(); return id ? 'https://gist.github.com/' + id : ''; }
+  };
+})();
+// 자동 시작 (토큰 있으면)
+window.addEventListener('load', () => { try { MMGist.init(); } catch(e){} });
+</script>
+
 <script type="text/babel">
 const uid = (p='n') => p + '_' + Math.random().toString(36).slice(2, 9);
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
@@ -1682,6 +1828,7 @@ function MindmapView() {
         <input id="search" className="search" placeholder="질문, 키워드, 답변 검색..."
                value={search} onChange={e=>setSearch(e.target.value)} />
         <div className="tb-spacer"></div>
+        <SyncIndicator />
         <ThemeToggle />
         <button className="btn ghost" onClick={()=>{
           MMStore.update(s=>{MM_DATA.categories.forEach(c=>{s.collapsedCats[c.id]=true;});});
@@ -2268,6 +2415,131 @@ function Modal({ modal, onClose, showT }) {
   );
 }
 
+// ─── SyncIndicator + SyncSettingsModal ───
+function SyncIndicator() {
+  const [status, setStatus] = React.useState(MMGist.getStatus());
+  const [err, setErr] = React.useState(MMGist.getError());
+  const [open, setOpen] = React.useState(false);
+  React.useEffect(() => MMGist.subscribe((s, e) => { setStatus(s); setErr(e); }), []);
+  React.useEffect(() => {
+    const onPull = () => { /* trigger UI refresh */ window.location.reload(); };
+    window.addEventListener('mm-gist-pulled', onPull);
+    return () => window.removeEventListener('mm-gist-pulled', onPull);
+  }, []);
+  const map = {
+    offline:    { color:'var(--text4)', label:'동기화 꺼짐 — 클릭해 토큰 입력' },
+    idle:       { color:'#22c55e',     label:'동기화됨' },
+    uploading:  { color:'#eab308',     label:'업로드 중...' },
+    downloading:{ color:'#0ea5e9',     label:'다운로드 중...' },
+    error:      { color:'#ef4444',     label:'동기화 오류' + (err ? ' — ' + err : '') },
+  };
+  const m = map[status] || map.offline;
+  return (
+    <>
+      <button onClick={()=>setOpen(true)} title={m.label}
+              style={{display:'inline-flex', alignItems:'center', gap:6, padding:'5px 12px', border:'1px solid var(--border)', background:'var(--surface)', borderRadius:9999, cursor:'pointer', fontFamily:'var(--font)', color:'var(--text)', fontSize:12, letterSpacing:'0.1px'}}>
+        <span style={{width:8, height:8, borderRadius:'50%', background:m.color, display:'inline-block'}}></span>
+        <span style={{fontWeight:500}}>{status === 'offline' ? '연결 안 됨' : (status === 'idle' ? '동기화됨' : (status === 'uploading' ? '업로드 중' : (status === 'downloading' ? '다운로드 중' : '오류')))}</span>
+      </button>
+      {open && <SyncSettingsModal onClose={()=>setOpen(false)} />}
+    </>
+  );
+}
+
+function SyncSettingsModal({ onClose }) {
+  const [token, setToken] = React.useState(MMGist.getToken());
+  const [gistId, setGistId] = React.useState(MMGist.getGistId());
+  const [busy, setBusy] = React.useState(false);
+  const [msg, setMsg] = React.useState('');
+  const [status, setStatus] = React.useState(MMGist.getStatus());
+  React.useEffect(() => MMGist.subscribe(s => setStatus(s)), []);
+  const url = MMGist.gistUrl();
+
+  const save = async () => {
+    if (!token.trim()) { setMsg('토큰을 입력하세요.'); return; }
+    MMGist.setToken(token.trim());
+    setBusy(true); setMsg('연결 확인 중...');
+    try {
+      const res = await fetch('https://api.github.com/user', { headers: { Authorization: 'Bearer ' + token.trim() } });
+      if (!res.ok) throw new Error(res.status + ' — 토큰이 유효하지 않습니다');
+      const u = await res.json();
+      setMsg('✓ ' + u.login + ' 계정으로 연결됨. ' + (gistId ? '기존 gist에서 동기화합니다.' : '첫 업로드 시 비공개 gist가 생성됩니다.'));
+      await MMGist.init();
+      if (!MMGist.getGistId()) {
+        setMsg('비공개 gist 생성 중...');
+        await MMGist.pushNow();
+        setGistId(MMGist.getGistId());
+        setMsg('✓ 비공개 gist 생성 + 업로드 완료');
+      }
+    } catch (e) { setMsg('✗ ' + e.message); }
+    setBusy(false);
+  };
+
+  const pushManual = async () => {
+    setBusy(true); setMsg('업로드 중...');
+    try { await MMGist.pushNow(); setMsg('✓ 업로드 완료'); }
+    catch (e) { setMsg('✗ ' + e.message); }
+    setBusy(false);
+  };
+  const pullManual = async () => {
+    if (!confirm('현재 이 기기의 데이터를 gist 데이터로 덮어씁니다. 계속할까요?')) return;
+    setBusy(true); setMsg('다운로드 중...');
+    const res = await MMGist.pullNow(true);
+    if (res && res.applied) { setMsg('✓ 다운로드 완료 — 새로고침합니다'); setTimeout(() => window.location.reload(), 600); }
+    else if (res && res.error) setMsg('✗ ' + res.error);
+    else setMsg('변경 사항 없음');
+    setBusy(false);
+  };
+  const disconnect = () => {
+    if (!confirm('동기화를 끄고 토큰/gist 연결을 이 기기에서 제거합니다. (gist 자체는 GitHub에 남습니다.) 계속?')) return;
+    MMGist.clearAll();
+    setToken(''); setGistId(''); setMsg('연결 해제됨.');
+  };
+
+  return (
+    <div className="modal-bg" onClick={onClose}>
+      <div className="modal" onClick={e=>e.stopPropagation()} style={{width:480}}>
+        <h3>기기 간 동기화</h3>
+        <div style={{fontSize:13, color:'var(--text2)', marginBottom:14, lineHeight:1.5}}>
+          GitHub의 비공개 gist에 모든 데이터를 자동 백업합니다. 다른 기기에서도 같은 토큰을 입력하면 같은 gist를 공유합니다.
+        </div>
+
+        <label>GITHUB PERSONAL ACCESS TOKEN (gist 권한)</label>
+        <input type="password" value={token} onChange={e=>setToken(e.target.value)}
+               placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autoFocus
+               style={{fontFamily:'Geist Mono, ui-monospace, Menlo, monospace'}} />
+        <div style={{fontSize:11, color:'var(--text3)', marginTop:6}}>
+          토큰 발급: <a href="https://github.com/settings/tokens/new" target="_blank" style={{color:'var(--text)'}}>github.com/settings/tokens/new</a> → scope <code style={{background:'var(--color-powder)', padding:'1px 6px', borderRadius:4}}>gist</code>만 체크
+        </div>
+
+        {gistId && (<>
+          <label style={{marginTop:18}}>연결된 GIST</label>
+          <div style={{fontSize:12, color:'var(--text2)', display:'flex', alignItems:'center', gap:8}}>
+            <a href={url} target="_blank" style={{color:'var(--text)', textDecoration:'underline', fontFamily:'Geist Mono, ui-monospace, Menlo, monospace'}}>{gistId}</a>
+            <span style={{color:'var(--text3)'}}>· 상태: {status}</span>
+          </div>
+        </>)}
+
+        {msg && (
+          <div style={{marginTop:14, fontSize:12, padding:'10px 12px', background:'var(--color-powder)', borderRadius:8, color:'var(--text)', fontFamily:'Geist Mono, ui-monospace, Menlo, monospace'}}>{msg}</div>
+        )}
+
+        <div className="modal-actions" style={{flexWrap:'wrap'}}>
+          {gistId ? (<>
+            <button className="btn ghost" onClick={pullManual} disabled={busy}>↓ 강제 다운로드</button>
+            <button className="btn ghost" onClick={pushManual} disabled={busy}>↑ 강제 업로드</button>
+            <button className="btn ghost" onClick={disconnect} disabled={busy} style={{color:'var(--color-ember)'}}>연결 해제</button>
+            <button className="btn primary" onClick={onClose}>닫기</button>
+          </>) : (<>
+            <button className="btn ghost" onClick={onClose}>취소</button>
+            <button className="btn primary" onClick={save} disabled={busy}>{busy ? '...' : '연결하고 업로드'}</button>
+          </>)}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── ColorPickerPopover ───
 const COLOR_PALETTE = [
   '#ef4444','#f97316','#f59e0b','#eab308','#84cc16','#22c55e',
@@ -2455,6 +2727,7 @@ function TableView() {
           <button className="tab" onClick={()=>tabSwitch('episode')}>에피소드 관리</button>
         </div>
         <div className="tb-spacer"></div>
+        <SyncIndicator />
         <ThemeToggle />
       </div>
       
@@ -2719,6 +2992,7 @@ function EpisodeManagerView() {
           <button className="tab active">에피소드 관리</button>
         </div>
         <div className="tb-spacer"></div>
+        <SyncIndicator />
         <ThemeToggle />
         <button className="btn primary" onClick={addEp}>+ 새 에피소드</button>
       </div>
