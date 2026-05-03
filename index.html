@@ -2171,7 +2171,7 @@ function getEpEmoji(epId) {
     const ep = getEpisodes().find(e => e.id === epId);
     const raw = (ep && ep.emoji) || MM_DATA.EP_EMOJI[epId] || '';
     return isBrokenEmoji(raw) ? '' : raw;
-  } catch { return ''; }
+  } catch(e) { return ''; }
 }
 function findEpByTag(tag) { return getEpisodes().find(ep => ep.tag === tag); }
 function findEpById(epId) { return getEpisodes().find(ep => ep.id === epId); }
@@ -3105,8 +3105,7 @@ const { useState, useEffect } = React;
 
 class ErrorBoundary extends React.Component {
   constructor(props) { super(props); this.state = { hasError: false }; }
-  static getDerivedStateFromError() { return { hasError: true }; }
-  componentDidCatch(err) { console.error('ErrorBoundary caught:', err); }
+  componentDidCatch(err) { console.error('ErrorBoundary caught:', err); this.setState({ hasError: true }); }
   render() {
     if (this.state.hasError) {
       return React.createElement('div', {style:{padding:40,textAlign:'center'}},
@@ -3119,6 +3118,7 @@ class ErrorBoundary extends React.Component {
     return this.props.children;
   }
 }
+ErrorBoundary.getDerivedStateFromError = function() { return { hasError: true }; };
 
 function App() {
   const [route, setRoute] = useState(() => {
