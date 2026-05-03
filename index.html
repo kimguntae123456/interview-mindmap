@@ -761,6 +761,15 @@ window.MM_DATA = {
 
 <script>
 // ─── store.js ───
+function isBrokenEmoji(s) {
+  if (!s) return false;
+  for (var i = 0; i < s.length; i++) {
+    var c = s.charCodeAt(i);
+    if (c >= 0xD800 && c <= 0xDBFF) { if (i+1 >= s.length || s.charCodeAt(i+1) < 0xDC00 || s.charCodeAt(i+1) > 0xDFFF) return true; i++; }
+    else if (c >= 0xDC00 && c <= 0xDFFF) return true;
+  }
+  return false;
+}
 (function () {
   const STORAGE_KEY = 'mindmap-v6';
   function migrateQuestion(q) {
@@ -799,8 +808,7 @@ window.MM_DATA = {
       if (saved.episodes) {
         state.episodes = saved.episodes.map(ep => {
           let emoji = ep.emoji || window.MM_DATA.EP_EMOJI[ep.id] || '';
-          // 깨진 surrogate pair 제거
-          if (emoji && /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/.test(emoji)) emoji = '';
+          if (isBrokenEmoji(emoji)) emoji = '';
           return { ...ep, emoji };
         });
       }
@@ -2162,9 +2170,7 @@ function getEpEmoji(epId) {
   try {
     const ep = getEpisodes().find(e => e.id === epId);
     const raw = (ep && ep.emoji) || MM_DATA.EP_EMOJI[epId] || '';
-    // 깨진 surrogate pair 검사
-    if (raw && /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/.test(raw)) return '';
-    return raw;
+    return isBrokenEmoji(raw) ? '' : raw;
   } catch { return ''; }
 }
 function findEpByTag(tag) { return getEpisodes().find(ep => ep.tag === tag); }
