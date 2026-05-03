@@ -2280,13 +2280,13 @@ function MentionDropdown({ targetRef, onSelect, onClose, filter }) {
     return function() { window.removeEventListener('keydown', onKey, true); };
   }, [activeIdx, filtered]);
 
-  if (filtered.length === 0) return null;
-
   const pos = React.useMemo(() => {
     if (!targetRef || !targetRef.current) return { left: 100, top: 100 };
     const rect = targetRef.current.getBoundingClientRect();
     return { left: rect.left, top: rect.bottom + 4 };
   }, []);
+
+  if (filtered.length === 0) return null;
 
   try {
     return ReactDOM.createPortal(
