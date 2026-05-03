@@ -797,7 +797,12 @@ window.MM_DATA = {
         });
       }
       if (saved.episodes) {
-        state.episodes = saved.episodes.map(ep => ({ ...ep, emoji: ep.emoji || window.MM_DATA.EP_EMOJI[ep.id] || '' }));
+        state.episodes = saved.episodes.map(ep => {
+          let emoji = ep.emoji || window.MM_DATA.EP_EMOJI[ep.id] || '';
+          // 깨진 surrogate pair 제거
+          if (emoji && /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/.test(emoji)) emoji = '';
+          return { ...ep, emoji };
+        });
       }
       if (saved.customNodes) state.customNodes = saved.customNodes;
       if (saved.customEdges) state.customEdges = saved.customEdges;
@@ -2154,8 +2159,13 @@ function getEpisodes() {
   return window.MM_DATA.episodes;
 }
 function getEpEmoji(epId) {
-  const ep = getEpisodes().find(e => e.id === epId);
-  return (ep && ep.emoji) || MM_DATA.EP_EMOJI[epId] || '';
+  try {
+    const ep = getEpisodes().find(e => e.id === epId);
+    const raw = (ep && ep.emoji) || MM_DATA.EP_EMOJI[epId] || '';
+    // 깨진 surrogate pair 검사
+    if (raw && /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/.test(raw)) return '';
+    return raw;
+  } catch { return ''; }
 }
 function findEpByTag(tag) { return getEpisodes().find(ep => ep.tag === tag); }
 function findEpById(epId) { return getEpisodes().find(ep => ep.id === epId); }
@@ -2274,9 +2284,9 @@ function MentionDropdown({ targetRef, onSelect, onClose, filter }) {
         <div key={ep.id} className={"mention-item" + (i === activeIdx ? ' active' : '')}
              onClick={() => onSelect(ep)}
              onMouseEnter={() => setActiveIdx(i)}>
-          <span className="ep-emoji">{getEpEmoji(ep.id)}</span>
-          <span className="ep-tag">{ep.tag}</span>
-          <span className="ep-desc">— {ep.desc}</span>
+          <span className="ep-emoji">{getEpEmoji(ep.id) || '📌'}</span>
+          <span className="ep-tag">{ep.tag || ''}</span>
+          <span className="ep-desc">— {ep.desc || ''}</span>
         </div>
       ))}
     </div>,
@@ -3031,8 +3041,8 @@ function EpisodeManagerView() {
             return (
               <div className="ep-card" key={ep.id}>
                 <div className="ep-card-head">
-                  <input className="ep-emoji-input" value={ep.emoji || ''} placeholder="📌" maxLength={4}
-                         onChange={e=>updateEp(ep.id, x=>x.emoji=e.target.value)} />
+                  <input className="ep-emoji-input" value={ep.emoji || ''} placeholder="📌"
+                         onChange={e=>{const v=e.target.value; if([...v].length<=2) updateEp(ep.id, x=>x.emoji=v);}} />
                   <input className="ep-tag-input" value={ep.tag} placeholder="태그"
                          onChange={e=>updateEp(ep.id, x=>x.tag=e.target.value)} />
                   <input className="ep-desc-input" value={ep.desc || ''} placeholder="한줄 설명"
@@ -3087,6 +3097,23 @@ window.EpisodeManagerView = EpisodeManagerView;
 
 const { useState, useEffect } = React;
 
+class ErrorBoundary extends React.Component {
+  constructor(props) { super(props); this.state = { hasError: false }; }
+  static getDerivedStateFromError() { return { hasError: true }; }
+  componentDidCatch(err) { console.error('ErrorBoundary caught:', err); }
+  render() {
+    if (this.state.hasError) {
+      return React.createElement('div', {style:{padding:40,textAlign:'center'}},
+        React.createElement('h2', null, '오류가 발생했습니다'),
+        React.createElement('button', {onClick:()=>{this.setState({hasError:false}); window.location.hash='#table';}}, '리스트 뷰로 돌아가기'),
+        ' ',
+        React.createElement('button', {onClick:()=>{this.setState({hasError:false}); window.location.hash='#mindmap';}}, '마인드맵으로 돌아가기')
+      );
+    }
+    return this.props.children;
+  }
+}
+
 function App() {
   const [route, setRoute] = useState(() => {
     const h = window.location.hash.slice(1);
@@ -3107,7 +3134,7 @@ function App() {
   return <MindmapView />;
 }
 
-ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+ReactDOM.createRoot(document.getElementById('root')).render(<ErrorBoundary><App /></ErrorBoundary>);
 </script>
 </body>
 </html>
