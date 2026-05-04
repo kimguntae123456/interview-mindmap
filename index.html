@@ -509,6 +509,33 @@ html, body { height:100%; overflow:hidden; background:var(--bg); color:var(--tex
 .ep-card-del { background: transparent; border: 1px solid var(--border); color: var(--text2); cursor: pointer; font-size: 16px; padding: 4px 10px; border-radius: var(--radius-pill); }
 .ep-card-del:hover { color: var(--bg); background: var(--text); border-color: var(--text); }
 
+/* ─── Selection Popover ─── */
+.sel-popover { position: fixed; z-index: 600; display: flex; gap: 2px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 4px; box-shadow: 0 4px 16px rgba(0,0,0,0.15); animation: sel-pop-in 0.12s ease-out; }
+@keyframes sel-pop-in { from { opacity:0; transform: translateY(4px); } to { opacity:1; transform: translateY(0); } }
+.sel-popover button { background: transparent; border: none; cursor: pointer; padding: 5px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; color: var(--text); font-family: var(--font); display: flex; align-items: center; gap: 4px; white-space: nowrap; }
+.sel-popover button:hover { background: var(--color-powder); }
+.sel-popover button .sel-icon { font-size: 14px; }
+.sel-popover .sel-divider { width: 1px; background: var(--border); margin: 2px 0; }
+
+/* ─── Formatted text rendering ─── */
+.fmt-bold { font-weight: 700; }
+.fmt-highlight { background: #fff3a8; padding: 1px 2px; border-radius: 2px; }
+html[data-theme="dark"] .fmt-highlight { background: #5c4b00; color: #ffe066; }
+
+/* ─── Excerpt Panel ─── */
+.excerpt-panel { position: fixed; right: 0; top: 56px; bottom: 0; width: 360px; background: var(--surface); border-left: 1px solid var(--border); z-index: 400; display: flex; flex-direction: column; box-shadow: -4px 0 16px rgba(0,0,0,0.08); animation: exc-slide 0.2s ease-out; }
+@keyframes exc-slide { from { transform: translateX(100%); } to { transform: translateX(0); } }
+@media (max-width: 500px) { .excerpt-panel { width: 100%; } }
+.excerpt-panel-head { display: flex; align-items: center; gap: 8px; padding: 16px 18px; border-bottom: 1px solid var(--border); }
+.excerpt-panel-head h3 { flex: 1; font-size: 14px; font-weight: 700; letter-spacing: 0.3px; margin: 0; }
+.excerpt-panel-body { flex: 1; overflow-y: auto; padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+.excerpt-card { background: var(--color-powder); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; font-size: 13px; line-height: 1.5; position: relative; }
+.excerpt-card-source { font-size: 10px; color: var(--text3); margin-top: 6px; font-family: 'Geist Mono', ui-monospace, Menlo, monospace; }
+.excerpt-card-del { position: absolute; top: 6px; right: 8px; background: transparent; border: none; cursor: pointer; color: var(--text3); font-size: 14px; padding: 2px; }
+.excerpt-card-del:hover { color: var(--text); }
+.excerpt-toggle { position: relative; }
+.excerpt-badge { position: absolute; top: -4px; right: -4px; background: var(--color-ember); color: white; font-size: 9px; font-weight: 700; min-width: 16px; height: 16px; border-radius: 999px; display: flex; align-items: center; justify-content: center; padding: 0 4px; }
+
 /* ─── Scrollbar ─── */
 ::-webkit-scrollbar { width:6px; }
 ::-webkit-scrollbar-track { background:transparent; }
@@ -2312,6 +2339,227 @@ function MentionDropdown({ targetRef, onSelect, onClose, filter }) {
   } catch(e) { console.error('MentionDropdown render error:', e); return null; }
 }
 
+// ─── Excerpt Store ───
+window.ExcerptStore = (function() {
+  var KEY = 'mm-excerpts';
+  var listeners = new Set();
+  function load() { try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch(e) { return []; } }
+  function save(arr) { localStorage.setItem(KEY, JSON.stringify(arr)); listeners.forEach(function(fn){ try{fn();}catch(e){} }); }
+  return {
+    get: load,
+    add: function(text, source) {
+      var arr = load();
+      arr.unshift({ id: 'ex_'+Date.now().toString(36), text: text, source: source || '', time: Date.now() });
+      save(arr);
+    },
+    remove: function(id) { save(load().filter(function(x){ return x.id !== id; })); },
+    clear: function() { save([]); },
+    subscribe: function(fn) { listeners.add(fn); return function() { listeners.delete(fn); }; }
+  };
+})();
+
+// ─── SelectionPopover — 텍스트 선택 시 Bold/Highlight/발췌 팝오버 ───
+function SelectionPopover() {
+  var ref = React.useRef(null);
+  var state = React.useState(null);
+  var popover = state[0];
+  var setPopover = state[1];
+
+  React.useEffect(function() {
+    var hideTimer = null;
+
+    function onMouseUp(e) {
+      clearTimeout(hideTimer);
+      hideTimer = setTimeout(function() {
+        var sel = window.getSelection();
+        var text = sel ? sel.toString() : '';
+        if (!text || text.length < 1) { setPopover(null); return; }
+        var active = document.activeElement;
+        if (!active || (active.tagName !== 'TEXTAREA' && !active.isContentEditable)) { setPopover(null); return; }
+        var range = null;
+        try { range = sel.getRangeAt(0); } catch(e) { setPopover(null); return; }
+        var rect = range.getBoundingClientRect();
+        if (!rect || (rect.width === 0 && rect.height === 0)) {
+          // textarea fallback
+          var taRect = active.getBoundingClientRect();
+          rect = { left: e.clientX, top: taRect.top, width: 0, height: 0 };
+        }
+        setPopover({ x: rect.left + rect.width / 2, y: rect.top - 8, target: active, text: text });
+      }, 150);
+    }
+
+    function onMouseDown() {
+      clearTimeout(hideTimer);
+      setPopover(null);
+    }
+
+    document.addEventListener('mouseup', onMouseUp);
+    document.addEventListener('mousedown', onMouseDown);
+    return function() {
+      document.removeEventListener('mouseup', onMouseUp);
+      document.removeEventListener('mousedown', onMouseDown);
+      clearTimeout(hideTimer);
+    };
+  }, []);
+
+  function wrapSelection(prefix, suffix) {
+    if (!popover || !popover.target) return;
+    var ta = popover.target;
+    if (ta.tagName === 'TEXTAREA') {
+      var start = ta.selectionStart;
+      var end = ta.selectionEnd;
+      var val = ta.value;
+      var selected = val.slice(start, end);
+      // toggle: 이미 감싸져 있으면 제거
+      var before = val.slice(0, start);
+      var after = val.slice(end);
+      if (before.endsWith(prefix) && after.startsWith(suffix)) {
+        var newVal = before.slice(0, -prefix.length) + selected + after.slice(suffix.length);
+        var nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value').set;
+        nativeInputValueSetter.call(ta, newVal);
+        ta.dispatchEvent(new Event('input', { bubbles: true }));
+        ta.setSelectionRange(start - prefix.length, end - prefix.length);
+      } else {
+        var newVal2 = before + prefix + selected + suffix + after;
+        var nativeInputValueSetter2 = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value').set;
+        nativeInputValueSetter2.call(ta, newVal2);
+        ta.dispatchEvent(new Event('input', { bubbles: true }));
+        ta.setSelectionRange(start + prefix.length, end + prefix.length);
+      }
+      ta.focus();
+    }
+    setPopover(null);
+  }
+
+  function doExcerpt() {
+    if (!popover) return;
+    var source = '';
+    var ta = popover.target;
+    // 질문 카드에서 발췌한 경우 질문 텍스트 찾기
+    if (ta) {
+      var card = ta.closest('.q-card') || ta.closest('.ep-card');
+      if (card) {
+        var qEl = card.querySelector('.qc-question') || card.querySelector('.ep-tag-input');
+        if (qEl) source = qEl.textContent || qEl.value || '';
+      }
+    }
+    ExcerptStore.add(popover.text, source.slice(0, 80));
+    setPopover(null);
+  }
+
+  if (!popover) return null;
+  var left = Math.max(10, Math.min(popover.x - 90, window.innerWidth - 200));
+  var top = Math.max(10, popover.y - 38);
+
+  return ReactDOM.createPortal(
+    React.createElement('div', { className: 'sel-popover', style: { left: left, top: top }, ref: ref },
+      React.createElement('button', { onMouseDown: function(e){ e.preventDefault(); wrapSelection('**','**'); }, title: '볼드 (Cmd+B)' },
+        React.createElement('span', { className: 'sel-icon', style: { fontWeight: 900 } }, 'B'),
+        '볼드'
+      ),
+      React.createElement('div', { className: 'sel-divider' }),
+      React.createElement('button', { onMouseDown: function(e){ e.preventDefault(); wrapSelection('==','=='); }, title: '형광펜' },
+        React.createElement('span', { className: 'sel-icon' }, '\uD83D\uDD8D'),
+        '형광펜'
+      ),
+      React.createElement('div', { className: 'sel-divider' }),
+      React.createElement('button', { onMouseDown: function(e){ e.preventDefault(); doExcerpt(); }, title: '발췌 모음에 추가' },
+        React.createElement('span', { className: 'sel-icon' }, '\uD83D\uDCCB'),
+        '발췌'
+      )
+    ),
+    document.body
+  );
+}
+
+// ─── ExcerptPanel — 발췌 모음 슬라이드 패널 ───
+function ExcerptPanel(props) {
+  var excState = React.useState(ExcerptStore.get());
+  var excerpts = excState[0];
+  var setExcerpts = excState[1];
+
+  React.useEffect(function() {
+    return ExcerptStore.subscribe(function() { setExcerpts(ExcerptStore.get()); });
+  }, []);
+
+  if (!props.open) return null;
+
+  return ReactDOM.createPortal(
+    React.createElement('div', { className: 'excerpt-panel' },
+      React.createElement('div', { className: 'excerpt-panel-head' },
+        React.createElement('h3', null, '\uD83D\uDCCB 발췌 모음 (' + excerpts.length + ')'),
+        excerpts.length > 0 && React.createElement('button', {
+          className: 'btn ghost', style: { fontSize: 11, padding: '4px 10px' },
+          onClick: function() { if (confirm('모든 발췌를 삭제할까요?')) ExcerptStore.clear(); }
+        }, '전체 삭제'),
+        React.createElement('button', {
+          style: { background: 'transparent', border: 'none', cursor: 'pointer', fontSize: 20, color: 'var(--text)', padding: '2px 4px' },
+          onClick: props.onClose
+        }, '\u00D7')
+      ),
+      React.createElement('div', { className: 'excerpt-panel-body' },
+        excerpts.length === 0
+          ? React.createElement('div', { style: { color: 'var(--text3)', fontSize: 13, textAlign: 'center', padding: 20 } }, '텍스트를 드래그하여 선택한 뒤\n"발췌" 버튼을 눌러 모아보세요.')
+          : excerpts.map(function(ex) {
+              return React.createElement('div', { className: 'excerpt-card', key: ex.id },
+                React.createElement('button', { className: 'excerpt-card-del', onClick: function() { ExcerptStore.remove(ex.id); } }, '\u00D7'),
+                React.createElement('div', null, formatRendered(ex.text)),
+                ex.source && React.createElement('div', { className: 'excerpt-card-source' }, '\u2190 ' + ex.source)
+              );
+            })
+      )
+    ),
+    document.body
+  );
+}
+
+// ─── formatRendered: **bold** 및 ==highlight== 렌더링 ───
+function formatRendered(text) {
+  if (!text) return '';
+  var parts = [];
+  var re = /(\*\*(.+?)\*\*)|(==(.+?)==)/g;
+  var last = 0;
+  var m;
+  while ((m = re.exec(text)) !== null) {
+    if (m.index > last) parts.push(text.slice(last, m.index));
+    if (m[1]) {
+      parts.push(React.createElement('span', { className: 'fmt-bold', key: 'b'+m.index }, m[2]));
+    } else if (m[3]) {
+      parts.push(React.createElement('span', { className: 'fmt-highlight', key: 'h'+m.index }, m[4]));
+    }
+    last = re.lastIndex;
+  }
+  if (last < text.length) parts.push(text.slice(last));
+  return parts.length > 0 ? parts : text;
+}
+
+// ─── wrapTextarea helper ───
+function wrapTextarea(ta, prefix, suffix, onChange) {
+  if (!ta) return;
+  var start = ta.selectionStart;
+  var end = ta.selectionEnd;
+  if (start === end) return; // 선택 없으면 무시
+  var val = ta.value;
+  var selected = val.slice(start, end);
+  var before = val.slice(0, start);
+  var after = val.slice(end);
+  var newVal;
+  if (before.endsWith(prefix) && after.startsWith(suffix)) {
+    newVal = before.slice(0, -prefix.length) + selected + after.slice(suffix.length);
+    var setter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value').set;
+    setter.call(ta, newVal);
+    ta.dispatchEvent(new Event('input', { bubbles: true }));
+    ta.setSelectionRange(start - prefix.length, end - prefix.length);
+  } else {
+    newVal = before + prefix + selected + suffix + after;
+    var setter2 = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value').set;
+    setter2.call(ta, newVal);
+    ta.dispatchEvent(new Event('input', { bubbles: true }));
+    ta.setSelectionRange(start + prefix.length, end + prefix.length);
+  }
+  if (onChange) onChange({ target: { value: ta.value } });
+}
+
 // ─── MentionTextarea ───
 function MentionTextarea({ value, onChange, placeholder, rows, style, className, autoResize }) {
   const [mentionState, setMentionState] = React.useState(null);
@@ -2343,6 +2591,17 @@ function MentionTextarea({ value, onChange, placeholder, rows, style, className,
 
   const handleKeyDown = (e) => {
     if (e.isComposing || e.keyCode === 229) return;
+    // Cmd+B: bold, Cmd+H: highlight
+    if ((e.metaKey || e.ctrlKey) && (e.key === 'b' || e.key === 'B')) {
+      e.preventDefault();
+      wrapTextarea(ref.current, '**', '**', onChange);
+      return;
+    }
+    if ((e.metaKey || e.ctrlKey) && (e.key === 'h' || e.key === 'H')) {
+      e.preventDefault();
+      wrapTextarea(ref.current, '==', '==', onChange);
+      return;
+    }
     if (mentionState && (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter')) {
       return;
     }
@@ -3210,6 +3469,8 @@ function App() {
     const h = window.location.hash.slice(1);
     return h.split('?')[0] || 'mindmap';
   });
+  const [excOpen, setExcOpen] = useState(false);
+  const [excCount, setExcCount] = useState(() => ExcerptStore.get().length);
 
   useEffect(() => {
     const onHash = () => {
@@ -3220,9 +3481,26 @@ function App() {
     return () => window.removeEventListener('hashchange', onHash);
   }, []);
 
-  if (route === 'table') return <TableView />;
-  if (route === 'episode') return <EpisodeManagerView />;
-  return <MindmapView />;
+  useEffect(() => {
+    return ExcerptStore.subscribe(() => setExcCount(ExcerptStore.get().length));
+  }, []);
+
+  var view;
+  if (route === 'table') view = <TableView />;
+  else if (route === 'episode') view = <EpisodeManagerView />;
+  else view = <MindmapView />;
+
+  return <>
+    {view}
+    <SelectionPopover />
+    <ExcerptPanel open={excOpen} onClose={() => setExcOpen(false)} />
+    <button className="excerpt-toggle" onClick={() => setExcOpen(!excOpen)}
+            style={{position:'fixed', bottom:20, right:20, zIndex:350, width:48, height:48, borderRadius:'50%', background:'var(--text)', color:'var(--bg)', border:'none', cursor:'pointer', fontSize:20, boxShadow:'0 2px 12px rgba(0,0,0,0.2)', display:'flex', alignItems:'center', justifyContent:'center'}}
+            title="발췌 모음">
+      📋
+      {excCount > 0 && <span className="excerpt-badge">{excCount}</span>}
+    </button>
+  </>;
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(<ErrorBoundary><App /></ErrorBoundary>);
