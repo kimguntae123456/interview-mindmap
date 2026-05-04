@@ -817,6 +817,7 @@ function isBrokenEmoji(s) {
       if (saved.positions) state.positions = saved.positions;
       if (saved.collapsedCats) state.collapsedCats = saved.collapsedCats;
       if (saved.view) state.view = saved.view;
+      if (saved.categories) saved.categories.forEach(sc => { if (!MM_DATA.categories.find(c => c.id === sc.id)) MM_DATA.categories.push(sc); });
       return state;
     } catch (e) {
       return JSON.parse(JSON.stringify(defaultState));
@@ -845,7 +846,7 @@ function isBrokenEmoji(s) {
   function persist() {
     clearTimeout(saveTimer);
     saveTimer = setTimeout(() => {
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); window.dispatchEvent(new CustomEvent('mm-saved')); } catch (e) {}
+      try { const toSave = Object.assign({}, state, { categories: MM_DATA.categories }); localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave)); window.dispatchEvent(new CustomEvent('mm-saved')); } catch (e) {}
     }, 200);
   }
 
@@ -875,8 +876,8 @@ function isBrokenEmoji(s) {
       return true;
     },
     reset() { localStorage.removeItem(STORAGE_KEY); state = load(); snapshot(); notify(); },
-    exportJSON() { return JSON.stringify({ questions: state.questions, episodes: state.episodes, customNodes: state.customNodes, customEdges: state.customEdges, positions: state.positions }, null, 2); },
-    importJSON(text) { try { const d = JSON.parse(text); this.update(s => { if (d.questions) s.questions = d.questions; if (d.episodes) s.episodes = d.episodes; if (d.customNodes) s.customNodes = d.customNodes; if (d.customEdges) s.customEdges = d.customEdges; if (d.positions) s.positions = d.positions; }); return true; } catch (e) { return false; } }
+    exportJSON() { return JSON.stringify({ questions: state.questions, episodes: state.episodes, customNodes: state.customNodes, customEdges: state.customEdges, positions: state.positions, categories: MM_DATA.categories }, null, 2); },
+    importJSON(text) { try { const d = JSON.parse(text); this.update(s => { if (d.questions) s.questions = d.questions; if (d.episodes) s.episodes = d.episodes; if (d.customNodes) s.customNodes = d.customNodes; if (d.customEdges) s.customEdges = d.customEdges; if (d.positions) s.positions = d.positions; }); if (d.categories) { MM_DATA.categories.length = 0; d.categories.forEach(c => MM_DATA.categories.push(c)); } return true; } catch (e) { return false; } }
   };
 })();
 </script>
@@ -2725,6 +2726,8 @@ function TableView() {
   const [adding, setAdding] = React.useState(false);
   const [newRow, setNewRow] = React.useState({ cat: 'c1', q: '', kw: '' });
   const [colorPicker, setColorPicker] = React.useState(null);
+  const [addingCat, setAddingCat] = React.useState(false);
+  const [newCat, setNewCat] = React.useState({ name: '', color: '#4a9eff' });
   const catColor = (id) => (state.catColors||{})[id] || MM_DATA.categories.find(c => c.id === id)?.color || '#999';
 
   React.useEffect(() => MMStore.subscribe(s => setState({...s})), []);
@@ -2785,12 +2788,23 @@ function TableView() {
             <button className={"filter-chip" + (catFilter==='all'?' active':'')} onClick={()=>setCatFilter('all')}>전체</button>
             {MM_DATA.categories.map(c => (
               <button key={c.id} className={"filter-chip" + (catFilter===c.id?' active':'')}
-                      onClick={()=>setCatFilter(catFilter===c.id?'all':c.id)}>
+                      onClick={()=>setCatFilter(catFilter===c.id?'all':c.id)}
+                      onContextMenu={e=>{e.preventDefault();if(confirm(c.name+' 카테고리를 삭제할까요? (소속 질문은 유지됩니다)')){MM_DATA.categories.splice(MM_DATA.categories.indexOf(c),1);MMStore.update(s=>{});setState({...MMStore.get()});}}}>
                 <span className="dot" style={{background:c.color}}></span>
                 {c.name}
                 <span className="cnt">{state.questions.filter(q=>q.cat===c.id).length}</span>
               </button>
             ))}
+            {addingCat ? (
+              <span style={{display:'inline-flex',gap:4,alignItems:'center'}}>
+                <input style={{padding:'4px 8px',borderRadius:20,border:'1px solid var(--border)',background:'var(--surface)',color:'var(--text)',fontSize:12,width:100}} placeholder="이름" value={newCat.name} onChange={e=>setNewCat({...newCat,name:e.target.value})} onKeyDown={e=>{if(e.key==='Enter'){const nm=newCat.name.trim();if(!nm)return;MM_DATA.categories.push({id:'cc_'+Date.now(),name:nm,color:newCat.color});MMStore.update(s=>{});setNewCat({name:'',color:'#4a9eff'});setAddingCat(false);setState({...MMStore.get()});}}} autoFocus />
+                <input type="color" value={newCat.color} onChange={e=>setNewCat({...newCat,color:e.target.value})} style={{width:24,height:24,border:'none',padding:0,cursor:'pointer',borderRadius:4}} />
+                <button className="filter-chip" onClick={()=>{const nm=newCat.name.trim();if(!nm)return;MM_DATA.categories.push({id:'cc_'+Date.now(),name:nm,color:newCat.color});MMStore.update(s=>{});setNewCat({name:'',color:'#4a9eff'});setAddingCat(false);setState({...MMStore.get()});}}>확인</button>
+                <button className="filter-chip" onClick={()=>setAddingCat(false)}>취소</button>
+              </span>
+            ) : (
+              <button className="filter-chip" onClick={()=>setAddingCat(true)} style={{borderStyle:'dashed',opacity:0.6}}>+ 카테고리</button>
+            )}
           </div>
           <div className="tbl-stats">{filledQ}/{totalQ} 완료</div>
         </div>
