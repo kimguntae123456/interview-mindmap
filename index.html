@@ -3543,6 +3543,23 @@ class ErrorBoundary extends React.Component {
 }
 ErrorBoundary.getDerivedStateFromError = function(err) { return { hasError: true, errorMsg: String(err && err.message || err) }; };
 
+var _scrollPos = {};
+function saveScroll(route) {
+  var sel = route === 'table' ? '.table-wrap' : route === 'episode' ? '.ep-wrap' : null;
+  if (!sel) return;
+  var el = document.querySelector(sel);
+  if (el) _scrollPos[route] = el.scrollTop;
+}
+function restoreScroll(route) {
+  var sel = route === 'table' ? '.table-wrap' : route === 'episode' ? '.ep-wrap' : null;
+  if (!sel || !_scrollPos[route]) return;
+  var pos = _scrollPos[route];
+  requestAnimationFrame(function() {
+    var el = document.querySelector(sel);
+    if (el) el.scrollTop = pos;
+  });
+}
+
 function App() {
   const [route, setRoute] = useState(() => {
     const h = window.location.hash.slice(1);
@@ -3550,15 +3567,23 @@ function App() {
   });
   const [excOpen, setExcOpen] = useState(false);
   const [excCount, setExcCount] = useState(() => ExcerptStore.get().length);
+  var prevRoute = React.useRef(route);
 
   useEffect(() => {
     const onHash = () => {
       const h = window.location.hash.slice(1);
-      setRoute(h.split('?')[0] || 'mindmap');
+      var next = h.split('?')[0] || 'mindmap';
+      saveScroll(prevRoute.current);
+      prevRoute.current = next;
+      setRoute(next);
     };
     window.addEventListener('hashchange', onHash);
     return () => window.removeEventListener('hashchange', onHash);
   }, []);
+
+  useEffect(() => {
+    restoreScroll(route);
+  }, [route]);
 
   useEffect(() => {
     return ExcerptStore.subscribe(() => setExcCount(ExcerptStore.get().length));
