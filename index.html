@@ -531,6 +531,12 @@ html, body { height:100%; overflow:hidden; background:var(--bg); color:var(--tex
 .fmt-bold { font-weight: 700; }
 .fmt-highlight { background: #fff3a8; padding: 1px 2px; border-radius: 2px; }
 html[data-theme="dark"] .fmt-highlight { background: #5c4b00; color: #ffe066; }
+.fmt-mention { color: var(--accent); font-weight: 500; }
+
+/* ─── Formatted Preview Overlay ─── */
+.fmt-preview { cursor: text; white-space: pre-wrap; word-break: break-word; }
+.fmt-preview:empty::before { content: attr(data-placeholder); color: var(--text3); }
+.fmt-preview .fmt-raw { display: none; }
 
 /* ─── Excerpt Panel ─── */
 .excerpt-panel { position: fixed; right: 0; top: 56px; bottom: 0; width: 360px; background: var(--surface); border-left: 1px solid var(--border); z-index: 400; display: flex; flex-direction: column; box-shadow: -4px 0 16px rgba(0,0,0,0.08); animation: exc-slide 0.2s ease-out; }
@@ -2534,20 +2540,28 @@ function ExcerptPanel(props) {
 }
 
 // ─── formatRendered: **bold** 및 ==highlight== 렌더링 ───
+var _fmtRe = /(\*\*(.+?)\*\*)|(==(.+?)==)|(\[@(.+?)\])/g;
+function hasFormatting(text) {
+  if (!text) return false;
+  _fmtRe.lastIndex = 0;
+  return _fmtRe.test(text);
+}
 function formatRendered(text) {
   if (!text) return '';
   var parts = [];
-  var re = /(\*\*(.+?)\*\*)|(==(.+?)==)/g;
+  _fmtRe.lastIndex = 0;
   var last = 0;
   var m;
-  while ((m = re.exec(text)) !== null) {
+  while ((m = _fmtRe.exec(text)) !== null) {
     if (m.index > last) parts.push(text.slice(last, m.index));
     if (m[1]) {
       parts.push(React.createElement('span', { className: 'fmt-bold', key: 'b'+m.index }, m[2]));
     } else if (m[3]) {
       parts.push(React.createElement('span', { className: 'fmt-highlight', key: 'h'+m.index }, m[4]));
+    } else if (m[5]) {
+      parts.push(React.createElement('span', { className: 'fmt-mention', key: 'm'+m.index }, m[6]));
     }
-    last = re.lastIndex;
+    last = _fmtRe.lastIndex;
   }
   if (last < text.length) parts.push(text.slice(last));
   return parts.length > 0 ? parts : text;
@@ -2583,6 +2597,7 @@ function wrapTextarea(ta, prefix, suffix, onChange) {
 // ─── MentionTextarea ───
 function MentionTextarea({ value, onChange, placeholder, rows, style, className, autoResize }) {
   const [mentionState, setMentionState] = React.useState(null);
+  const [editing, setEditing] = React.useState(false);
   const ref = React.useRef(null);
 
   // auto-resize
@@ -2592,6 +2607,10 @@ function MentionTextarea({ value, onChange, placeholder, rows, style, className,
     ta.style.height = 'auto';
     ta.style.height = ta.scrollHeight + 'px';
   }, [value, autoResize]);
+
+  var showPreview = !editing && hasFormatting(value);
+
+  var handleFocus = function() { setEditing(true); };
 
   const handleChange = (e) => {
     const newVal = e.target.value;
@@ -2648,14 +2667,31 @@ function MentionTextarea({ value, onChange, placeholder, rows, style, className,
   };
 
   const handleBlur = (e) => {
-    setTimeout(() => setMentionState(null), 200);
+    setTimeout(function() { setMentionState(null); setEditing(false); }, 200);
   };
+
+  if (showPreview) {
+    return React.createElement('div', {
+      className: (className || 'dp-textarea') + ' fmt-preview',
+      style: Object.assign({}, style || {}, { minHeight: rows ? (rows * 20 + 12) : undefined }),
+      'data-placeholder': placeholder || '',
+      onClick: function() {
+        setEditing(true);
+        setTimeout(function() { if (ref.current) ref.current.focus(); }, 0);
+      },
+      tabIndex: 0,
+      onFocus: function() {
+        setEditing(true);
+        setTimeout(function() { if (ref.current) ref.current.focus(); }, 0);
+      }
+    }, formatRendered(value));
+  }
 
   return (
     <>
       <textarea ref={ref} className={className || "dp-textarea"} value={value || ''}
                 placeholder={placeholder} rows={rows} style={style}
-                onChange={handleChange} onKeyDown={handleKeyDown} onBlur={handleBlur} />
+                onChange={handleChange} onKeyDown={handleKeyDown} onBlur={handleBlur} onFocus={handleFocus} />
       {mentionState && (
         <MentionDropdown targetRef={ref} filter={mentionState.filter}
                          onSelect={handleSelect} onClose={()=>setMentionState(null)} />
