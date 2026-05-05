@@ -3466,13 +3466,15 @@ function EpisodeManagerView() {
 
   var usageDetailFn = function(epTag) {
     var re = new RegExp('\\[@' + epTag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\]');
+    var kwLow = epTag.toLowerCase();
     var usedIn = [];
     state.questions.forEach(function(q) {
       var hit = false;
       if (re.test(q.q)) hit = true;
-      if (q.answers.some(function(a) { return a && re.test(a); })) hit = true;
+      if (q.kw && q.kw.toLowerCase().split(/[\/,\s]+/).some(function(k){ return k === kwLow; })) hit = true;
+      if (q.answers.some(function(a) { return a && (re.test(a) || a.toLowerCase().includes(kwLow)); })) hit = true;
       if ((q.scripts||[]).some(function(sc) { return sc.content && re.test(sc.content); })) hit = true;
-      if (q.tail && re.test(q.tail)) hit = true;
+      if (q.tail && (re.test(q.tail) || q.tail.toLowerCase().includes(kwLow))) hit = true;
       if (hit) usedIn.push(q);
     });
     return { count: usedIn.length, usedIn: usedIn };
