@@ -3465,11 +3465,20 @@ function EpisodeManagerView() {
   }, [episodes, filter, stars, catFilter]);
 
   var usageDetailFn = function(epTag) {
-    var t = epTag.toLowerCase();
+    var t = epTag.toLowerCase().trim();
     var usedIn = [];
-    state.questions.forEach(function(q) {
-      if (JSON.stringify(q).toLowerCase().indexOf(t) !== -1) usedIn.push(q);
+    var allQ = state.questions || [];
+    allQ.forEach(function(q) {
+      var s = JSON.stringify(q).toLowerCase();
+      if (s.indexOf(t) !== -1) usedIn.push(q);
     });
+    if (usedIn.length === 0 && allQ.length > 0) {
+      console.log('[EP-DEBUG] tag="' + epTag + '" trim="' + t + '" qCount=' + allQ.length);
+      allQ.forEach(function(q, i) {
+        var s = JSON.stringify(q).toLowerCase();
+        if (s.indexOf(t.charAt(0)) !== -1) console.log('[EP-DEBUG] partial match q[' + i + ']:', q.q, '→', s.substring(0, 200));
+      });
+    }
     return { count: usedIn.length, usedIn: usedIn };
   };
 
