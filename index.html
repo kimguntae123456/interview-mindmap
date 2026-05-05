@@ -3476,9 +3476,13 @@ function EpisodeManagerView() {
       var rootQ = cn.rootQId || cn.parentId;
       if (rootQ) { if (!cnByQ[rootQ]) cnByQ[rootQ] = []; cnByQ[rootQ].push(cn); }
     });
-    // @멘션 검색 헬퍼: [@태그] 또는 @태그 패턴만 매칭
+    // @멘션 검색: [@태그] 또는 @태그
     var hasMention = function(text) {
       return text && (text.includes(mentionPat) || text.includes(atPat));
+    };
+    // plain text 검색: 답변 텍스트에 태그명 포함
+    var hasPlainTag = function(text) {
+      return text && text.includes(t);
     };
     allQ.forEach(function(q) {
       // 1) customNodes(답변 노드) label에서 @멘션 검색
@@ -3490,6 +3494,10 @@ function EpisodeManagerView() {
       if (!found) found = (q.scripts || []).some(function(sc) { return sc && hasMention(sc.content); });
       // 4) fullAnswer, tail에서 @멘션 검색
       if (!found) found = hasMention(q.fullAnswer) || hasMention(q.tail);
+      // 5) fallback: answers에 태그명 plain text 포함 여부
+      if (!found) found = (q.answers || []).some(function(a) { return hasPlainTag(a); });
+      // 6) fallback: customNodes label에 태그명 plain text
+      if (!found) found = nodes.some(function(cn) { return hasPlainTag(cn.label); });
       if (found) usedIn.push(q);
     });
     return { count: usedIn.length, usedIn: usedIn };
