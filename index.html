@@ -451,6 +451,7 @@ html, body { height:100%; overflow:hidden; background:var(--bg); color:var(--tex
 .qc-right { display: flex; flex-direction: column; gap: 10px; }
 .qc-script-block { display: flex; flex-direction: column; gap: 4px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; box-shadow: var(--shadow-inset); }
 .qc-script-block:focus-within { border-color: var(--text); }
+.qc-script-block .fmt-preview { flex: 1; border: none; padding: 4px 4px 8px; font-size: 14px; line-height: 1.55; background: transparent; min-height: 130px; font-family: var(--font); color: var(--text); width: 100%; letter-spacing: 0.1px; }
 .qc-script-head { display: flex; align-items: center; gap: 6px; }
 .qc-script-title { flex: 1; border: none; background: transparent; font-size: 11px; font-weight: 700; color: var(--text2); outline: none; padding: 2px 4px; font-family: var(--font); letter-spacing: 0.7px; text-transform: uppercase; }
 .qc-script-title:focus { color: var(--text); }
@@ -3375,7 +3376,7 @@ function EpisodeCard({ ep, stars, updateEp, removeEp, updateScripts, usageDetail
                 title: uq.q
               },
                 cat && React.createElement('span', {className:'ep-used-dot', style:{background:cat.color}}),
-                uq.q.length > 20 ? uq.q.slice(0,20)+'\u2026' : uq.q
+                uq.q
               );
             })}
             {!expanded && usage.usedIn.length > 3 && React.createElement('span', {
