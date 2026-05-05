@@ -2541,7 +2541,7 @@ function ExcerptPanel(props) {
 }
 
 // ─── formatRendered: **bold** 및 ==highlight== 렌더링 ───
-var _fmtRe = /(\*\*(.+?)\*\*)|(==(.+?)==)|(\[@(.+?)\])/g;
+var _fmtRe = /(\*\*([\s\S]+?)\*\*)|(==([\s\S]+?)==)|(\[@(.+?)\])/g;
 function hasFormatting(text) {
   if (!text) return false;
   _fmtRe.lastIndex = 0;
