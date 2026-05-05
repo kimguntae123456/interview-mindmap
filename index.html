@@ -496,14 +496,24 @@ html, body { height:100%; overflow:hidden; background:var(--bg); color:var(--tex
 .ep-desc-input { width: 100%; border: 1px solid var(--border); border-radius: 4px; padding: 6px 10px; font-size: 12px; outline: none; background: var(--surface); font-family: var(--font); color: var(--text2); box-shadow: var(--shadow-inset); }
 .ep-card-del { background: transparent; border: 1px solid var(--border); color: var(--text3); cursor: pointer; font-size: 14px; padding: 2px 8px; border-radius: var(--radius-pill); flex-shrink: 0; }
 .ep-card-del:hover { color: var(--bg); background: var(--text); border-color: var(--text); }
-.ep-mode-tabs { display: flex; gap: 0; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
-.ep-mode-tab { flex: 1; border: none; background: var(--color-powder); padding: 6px 10px; font-size: 11px; font-weight: 600; cursor: pointer; color: var(--text2); font-family: var(--font); letter-spacing: 0.3px; transition: all .15s; }
-.ep-mode-tab.active { background: var(--text); color: var(--bg); }
-.ep-mode-tab:not(.active):hover { background: var(--border); }
-.ep-script-area textarea { width: 100%; border: 1px solid var(--border); border-radius: 4px; padding: 8px 10px; font-size: 13px; line-height: 1.5; outline: none; background: var(--surface); resize: vertical; font-family: var(--font); color: var(--text); box-shadow: var(--shadow-inset); letter-spacing: 0.1px; }
-.ep-script-area textarea:focus { border-color: var(--text); }
-.ep-card-foot { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--text3); }
-.ep-usage { font-family: 'Geist Mono', ui-monospace, Menlo, monospace; letter-spacing: 0.05em; }
+.ep-drag-handle { cursor: grab; color: var(--text3); font-size: 16px; padding: 2px 4px; flex-shrink: 0; user-select: none; -webkit-user-select: none; }
+.ep-drag-handle:active { cursor: grabbing; }
+.ep-card.dragging { opacity: 0.4; border-style: dashed; }
+.ep-card.drag-over { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(4,71,255,0.15); }
+.ep-scripts { display: flex; flex-direction: column; gap: 8px; }
+.ep-script-block { background: var(--color-powder); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; display: flex; flex-direction: column; gap: 4px; }
+.ep-script-label { display: flex; align-items: center; gap: 6px; }
+.ep-script-label input { flex: 1; border: none; background: transparent; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: var(--text2); outline: none; padding: 0; font-family: var(--font); }
+.ep-script-label input:focus { color: var(--text); }
+.ep-script-label .ep-sc-chars { font-size: 9px; color: var(--text3); font-family: 'Geist Mono', ui-monospace, monospace; white-space: nowrap; }
+.ep-script-label button { background: transparent; border: none; color: var(--text3); cursor: pointer; font-size: 13px; padding: 0 2px; }
+.ep-script-label button:hover { color: var(--text); }
+.ep-script-block textarea { width: 100%; border: 1px solid var(--border); border-radius: 4px; padding: 6px 8px; font-size: 13px; line-height: 1.5; outline: none; background: var(--surface); resize: none; overflow: hidden; font-family: var(--font); color: var(--text); box-shadow: var(--shadow-inset); letter-spacing: 0.1px; min-height: 36px; }
+.ep-script-block textarea:focus { border-color: var(--text); }
+.ep-add-script { align-self: flex-start; font-size: 11px; font-weight: 500; padding: 3px 12px; border: 1px dashed var(--border); background: transparent; border-radius: 999px; cursor: pointer; color: var(--text2); font-family: var(--font); }
+.ep-add-script:hover { border-style: solid; color: var(--text); }
+.ep-card-foot { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--text3); flex-wrap: wrap; }
+.ep-usage { font-family: 'Geist Mono', ui-monospace, Menlo, monospace; letter-spacing: 0.05em; flex-shrink: 0; }
 .ep-used-pills { display: flex; flex-wrap: wrap; gap: 4px; }
 .ep-used-pill { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; padding: 2px 8px; border-radius: 999px; background: var(--color-powder); border: 1px solid var(--border); color: var(--text2); cursor: pointer; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: background .1s; }
 .ep-used-pill:hover { background: var(--border); }
@@ -742,6 +752,16 @@ window.MM_DATA = {
     if (typeof entry.fullScript !== 'string') entry.fullScript = '';
     if (typeof entry.briefScript !== 'string') entry.briefScript = '';
     if (!Array.isArray(entry.subsections)) entry.subsections = [];
+    // migrate to scripts array
+    if (!Array.isArray(entry.scripts)) {
+      entry.scripts = [];
+      if (entry.fullScript) entry.scripts.push({ id: 'sc_full', label: '완전형(대본)', content: entry.fullScript });
+      if (entry.briefScript) entry.scripts.push({ id: 'sc_brief', label: '축약형', content: entry.briefScript });
+      if (entry.scripts.length === 0) {
+        entry.scripts.push({ id: 'sc_full', label: '완전형(대본)', content: '' });
+        entry.scripts.push({ id: 'sc_brief', label: '축약형', content: '' });
+      }
+    }
     return entry;
   }
   function loadStars() {
@@ -3230,26 +3250,57 @@ const EP_MODES = [
   { key: 'brief', label: '축약형', placeholder: '핵심 키워드와 요약만 간결하게...' },
 ];
 
-function EpisodeCard({ ep, stars, updateEp, removeEp, updateStarField, usageDetail }) {
-  const star = stars[ep.id] || { fullScript:'', briefScript:'' };
-  const usage = usageDetail(ep.tag);
-  const modeState = React.useState('full');
-  const mode = modeState[0];
-  const setMode = modeState[1];
-  const expandState = React.useState(false);
-  const expanded = expandState[0];
-  const setExpanded = expandState[1];
+function EpAutoTextarea({ value, onChange, placeholder }) {
+  var ref = React.useRef(null);
+  React.useEffect(function() {
+    if (!ref.current) return;
+    ref.current.style.height = 'auto';
+    ref.current.style.height = ref.current.scrollHeight + 'px';
+  }, [value]);
+  return React.createElement('textarea', {
+    ref: ref, value: value || '', placeholder: placeholder,
+    onChange: onChange, rows: 1
+  });
+}
 
-  var scriptKey = mode === 'full' ? 'fullScript' : 'briefScript';
-  var scriptVal = star[scriptKey] || '';
-  var otherKey = mode === 'full' ? 'briefScript' : 'fullScript';
-  var otherVal = star[otherKey] || '';
-  var hasContent = !!(scriptVal.trim() || otherVal.trim());
+function EpisodeCard({ ep, stars, updateEp, removeEp, updateScripts, usageDetail, onDragStart, onDragOver, onDragEnd, onDrop }) {
+  var star = stars[ep.id] || {};
+  var scripts = star.scripts || [
+    { id: 'sc_full', label: '완전형(대본)', content: '' },
+    { id: 'sc_brief', label: '축약형', content: '' }
+  ];
+  var usage = usageDetail(ep.tag);
+  var expandState = React.useState(false);
+  var expanded = expandState[0];
+  var setExpanded = expandState[1];
+
+  var updateScript = function(idx, field, val) {
+    var newScripts = scripts.map(function(s, i) {
+      if (i === idx) { var copy = Object.assign({}, s); copy[field] = val; return copy; }
+      return s;
+    });
+    updateScripts(ep.id, newScripts);
+  };
+
+  var removeScript = function(idx) {
+    if (scripts.length <= 1) return;
+    updateScripts(ep.id, scripts.filter(function(_, i) { return i !== idx; }));
+  };
+
+  var addScript = function() {
+    var newScripts = scripts.concat([{ id: 'sc_' + Date.now().toString(36), label: '대본 ' + (scripts.length + 1), content: '' }]);
+    updateScripts(ep.id, newScripts);
+  };
 
   return (
-    <div className="ep-card">
+    <div className="ep-card" draggable="true"
+         onDragStart={function(e){ onDragStart(e, ep.id); }}
+         onDragOver={function(e){ onDragOver(e, ep.id); }}
+         onDragEnd={onDragEnd}
+         onDrop={function(e){ onDrop(e, ep.id); }}>
       <div className="ep-card-head">
-        <input className="ep-emoji-input" value={ep.emoji || ''} placeholder="\uD83D\uDCCC"
+        <span className="ep-drag-handle" title="드래그하여 순서 변경">⠿</span>
+        <input className="ep-emoji-input" value={ep.emoji || ''} placeholder={"\uD83D\uDCCC"}
                onChange={function(e){var v=e.target.value; if([...v].length<=2) updateEp(ep.id, function(x){x.emoji=v;});}} />
         <input className="ep-tag-input" value={ep.tag} placeholder="태그"
                onChange={function(e){updateEp(ep.id, function(x){x.tag=e.target.value;});}} />
@@ -3259,21 +3310,28 @@ function EpisodeCard({ ep, stars, updateEp, removeEp, updateStarField, usageDeta
       <input className="ep-desc-input" value={ep.desc || ''} placeholder="한줄 설명"
              onChange={function(e){updateEp(ep.id, function(x){x.desc=e.target.value;});}} />
 
-      {/* 완전형 / 축약형 탭 */}
-      <div className="ep-mode-tabs">
-        <button className={"ep-mode-tab" + (mode==='full'?' active':'')} onClick={function(){setMode('full');}}>완전형(대본)</button>
-        <button className={"ep-mode-tab" + (mode==='brief'?' active':'')} onClick={function(){setMode('brief');}}>축약형</button>
+      {/* 모든 대본 동시 표시 */}
+      <div className="ep-scripts">
+        {scripts.map(function(sc, idx) {
+          return (
+            <div className="ep-script-block" key={sc.id || idx}>
+              <div className="ep-script-label">
+                <input value={sc.label || ''} placeholder={'대본 ' + (idx+1)}
+                       onChange={function(e){ updateScript(idx, 'label', e.target.value); }} />
+                <span className="ep-sc-chars">{(sc.content||'').length}자</span>
+                {scripts.length > 1 && (
+                  <button title="삭제" onClick={function(){ if(confirm('이 대본을 삭제할까요?')) removeScript(idx); }}>×</button>
+                )}
+              </div>
+              <EpAutoTextarea value={sc.content || ''} placeholder={(sc.label||'대본') + ' 작성...'}
+                             onChange={function(e){ updateScript(idx, 'content', e.target.value); }} />
+            </div>
+          );
+        })}
+        <button className="ep-add-script" onClick={addScript}>+ 대본 추가</button>
       </div>
 
-      <div className="ep-script-area">
-        <MentionTextarea value={scriptVal}
-                         placeholder={mode==='full' ? '실전 면접 대본 전문...' : '핵심 키워드·요약...'}
-                         onChange={function(e){ updateStarField(ep.id, scriptKey, e.target.value); }}
-                         rows={mode==='full' ? 4 : 2}
-                         style={{minHeight: mode==='full' ? 80 : 40, width:'100%'}} />
-      </div>
-
-      {/* 카드 하단: 사용 횟수 + 질문 pill */}
+      {/* 사용 횟수 + 질문 pill */}
       <div className="ep-card-foot">
         <span className="ep-usage">{usage.count}회</span>
         {usage.usedIn.length > 0 && (
@@ -3286,7 +3344,7 @@ function EpisodeCard({ ep, stars, updateEp, removeEp, updateStarField, usageDeta
                 title: uq.q
               },
                 cat && React.createElement('span', {className:'ep-used-dot', style:{background:cat.color}}),
-                uq.q.length > 20 ? uq.q.slice(0,20)+'…' : uq.q
+                uq.q.length > 20 ? uq.q.slice(0,20)+'\u2026' : uq.q
               );
             })}
             {!expanded && usage.usedIn.length > 3 && React.createElement('span', {
@@ -3301,15 +3359,21 @@ function EpisodeCard({ ep, stars, updateEp, removeEp, updateStarField, usageDeta
 }
 
 function EpisodeManagerView() {
-  const [state, setState] = React.useState(MMStore.get());
-  const [stars, setStars] = React.useState(function() { return MMStars.get(); });
-  const [filter, setFilter] = React.useState('');
+  var stState = React.useState(MMStore.get());
+  var state = stState[0]; var setState = stState[1];
+  var stStars = React.useState(function() { return MMStars.get(); });
+  var stars = stStars[0]; var setStars = stStars[1];
+  var stFilter = React.useState('');
+  var filter = stFilter[0]; var setFilter = stFilter[1];
+  var stDrag = React.useState(null);
+  var dragId = stDrag[0]; var setDragId = stDrag[1];
+  var stOver = React.useState(null);
+  var overId = stOver[0]; var setOverId = stOver[1];
 
   React.useEffect(function() { return MMStore.subscribe(function(s) { setState({...s}); }); }, []);
   React.useEffect(function() { return MMStars.subscribe(function() { setStars(MMStars.get()); }); }, []);
 
   var tabSwitch = function(tab) { window.location.hash = '#' + tab; };
-
   var episodes = state.episodes || [];
 
   var filtered = React.useMemo(function() {
@@ -3319,6 +3383,8 @@ function EpisodeManagerView() {
       if (ep.tag.toLowerCase().includes(t)) return true;
       if (ep.desc && ep.desc.toLowerCase().includes(t)) return true;
       var star = stars[ep.id] || {};
+      var scs = star.scripts || [];
+      if (scs.some(function(sc) { return (sc.content||'').toLowerCase().includes(t); })) return true;
       if ((star.fullScript||'').toLowerCase().includes(t)) return true;
       if ((star.briefScript||'').toLowerCase().includes(t)) return true;
       return false;
@@ -3327,8 +3393,7 @@ function EpisodeManagerView() {
 
   var usageDetailFn = function(epTag) {
     var re = new RegExp('\\[@' + epTag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\]');
-    var count = 0;
-    var usedIn = [];
+    var count = 0; var usedIn = [];
     state.questions.forEach(function(q) {
       var hit = false;
       if (re.test(q.q)) { count++; hit = true; }
@@ -3351,7 +3416,10 @@ function EpisodeManagerView() {
       s.episodes = s.episodes || [];
       s.episodes.push({ id: newId, tag: '새에피소드', desc: '한줄 설명', emoji: '\uD83D\uDCCC' });
     });
-    MMStars.setEntry(newId, { fullScript:'', briefScript:'' });
+    MMStars.setEntry(newId, { scripts: [
+      { id: 'sc_full', label: '완전형(대본)', content: '' },
+      { id: 'sc_brief', label: '축약형', content: '' }
+    ]});
   };
 
   var removeEp = function(epId) {
@@ -3360,13 +3428,47 @@ function EpisodeManagerView() {
     MMStars.remove(epId);
   };
 
-  var updateStarField = function(epId, field, value) {
-    MMStars.update(epId, field, value);
+  var updateScripts = function(epId, scripts) {
+    MMStars.setEntry(epId, { scripts: scripts });
+  };
+
+  // drag & drop handlers
+  var onDragStart = function(e, id) {
+    setDragId(id);
+    e.dataTransfer.effectAllowed = 'move';
+    setTimeout(function() {
+      var el = e.target.closest('.ep-card');
+      if (el) el.classList.add('dragging');
+    }, 0);
+  };
+  var onDragOver = function(e, id) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setOverId(id);
+  };
+  var onDragEnd = function(e) {
+    document.querySelectorAll('.ep-card.dragging').forEach(function(el) { el.classList.remove('dragging'); });
+    setDragId(null); setOverId(null);
+  };
+  var onDrop = function(e, targetId) {
+    e.preventDefault();
+    if (!dragId || dragId === targetId) { onDragEnd(e); return; }
+    MMStore.update(function(s) {
+      var eps = s.episodes || [];
+      var fromIdx = eps.findIndex(function(x) { return x.id === dragId; });
+      var toIdx = eps.findIndex(function(x) { return x.id === targetId; });
+      if (fromIdx < 0 || toIdx < 0) return;
+      var item = eps.splice(fromIdx, 1)[0];
+      eps.splice(toIdx, 0, item);
+    });
+    onDragEnd(e);
   };
 
   var totalEp = episodes.length;
   var filledEp = episodes.filter(function(ep) {
     var s = stars[ep.id] || {};
+    var scs = s.scripts || [];
+    if (scs.some(function(sc) { return (sc.content||'').trim(); })) return true;
     return !!((s.fullScript||'').trim() || (s.briefScript||'').trim());
   }).length;
 
@@ -3396,8 +3498,10 @@ function EpisodeManagerView() {
             return React.createElement(EpisodeCard, {
               key: ep.id, ep: ep, stars: stars,
               updateEp: updateEp, removeEp: removeEp,
-              updateStarField: updateStarField,
-              usageDetail: usageDetailFn
+              updateScripts: updateScripts,
+              usageDetail: usageDetailFn,
+              onDragStart: onDragStart, onDragOver: onDragOver,
+              onDragEnd: onDragEnd, onDrop: onDrop
             });
           })}
           {filtered.length === 0 && (
