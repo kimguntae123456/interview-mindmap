@@ -3468,22 +3468,27 @@ function EpisodeManagerView() {
     var t = epTag.trim();
     var tLow = t.toLowerCase();
     var mentionPat = '[@' + t + ']';
-    var mentionPatLow = mentionPat.toLowerCase();
+    var atPat = '@' + t;
     var usedIn = [];
     var allQ = state.questions || [];
+    // customNodes에서 질문별 답변 노드 매핑
+    var cnByQ = {};
+    (state.customNodes || []).forEach(function(cn) {
+      var rootQ = cn.rootQId || cn.parentId;
+      if (rootQ) { if (!cnByQ[rootQ]) cnByQ[rootQ] = []; cnByQ[rootQ].push(cn); }
+    });
     allQ.forEach(function(q) {
-      // 1) answers 배열에서 [@태그] 멘션 검색
-      var found = (q.answers || []).some(function(a) { return a && a.includes(mentionPat); });
-      // 2) scripts 내용에서 [@태그] 멘션 검색
-      if (!found) found = (q.scripts || []).some(function(sc) { return sc && sc.content && sc.content.includes(mentionPat); });
-      // 3) fullAnswer에서 멘션 검색
-      if (!found && q.fullAnswer) found = q.fullAnswer.includes(mentionPat);
-      // 4) tail(꼬리질문)에서 멘션 검색
-      if (!found && q.tail) found = q.tail.includes(mentionPat);
-      // 5) 폴백: kw 키워드에서 텍스트 검색
+      // 1) customNodes(답변 노드) label에서 [@태그] 또는 @태그 검색
+      var nodes = cnByQ[q.id] || [];
+      var found = nodes.some(function(cn) { return cn.label && (cn.label.includes(mentionPat) || cn.label.includes(atPat) || cn.label.toLowerCase().includes(tLow)); });
+      // 2) answers 배열에서 멘션 검색
+      if (!found) found = (q.answers || []).some(function(a) { return a && (a.includes(mentionPat) || a.includes(atPat) || a.toLowerCase().includes(tLow)); });
+      // 3) scripts 내용에서 멘션 검색
+      if (!found) found = (q.scripts || []).some(function(sc) { return sc && sc.content && (sc.content.includes(mentionPat) || sc.content.includes(atPat) || sc.content.toLowerCase().includes(tLow)); });
+      // 4) fullAnswer, tail, kw
+      if (!found && q.fullAnswer) found = q.fullAnswer.toLowerCase().includes(tLow);
+      if (!found && q.tail) found = q.tail.toLowerCase().includes(tLow);
       if (!found && q.kw) found = q.kw.toLowerCase().includes(tLow);
-      // 6) 폴백: 전체 JSON stringify 검색
-      if (!found) found = JSON.stringify(q).toLowerCase().indexOf(tLow) !== -1;
       if (found) usedIn.push(q);
     });
     return { count: usedIn.length, usedIn: usedIn };
