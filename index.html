@@ -3465,20 +3465,27 @@ function EpisodeManagerView() {
   }, [episodes, filter, stars, catFilter]);
 
   var usageDetailFn = function(epTag) {
-    var t = epTag.toLowerCase().trim();
+    var t = epTag.trim();
+    var tLow = t.toLowerCase();
+    var mentionPat = '[@' + t + ']';
+    var mentionPatLow = mentionPat.toLowerCase();
     var usedIn = [];
     var allQ = state.questions || [];
     allQ.forEach(function(q) {
-      var s = JSON.stringify(q).toLowerCase();
-      if (s.indexOf(t) !== -1) usedIn.push(q);
+      // 1) answers 배열에서 [@태그] 멘션 검색
+      var found = (q.answers || []).some(function(a) { return a && a.includes(mentionPat); });
+      // 2) scripts 내용에서 [@태그] 멘션 검색
+      if (!found) found = (q.scripts || []).some(function(sc) { return sc && sc.content && sc.content.includes(mentionPat); });
+      // 3) fullAnswer에서 멘션 검색
+      if (!found && q.fullAnswer) found = q.fullAnswer.includes(mentionPat);
+      // 4) tail(꼬리질문)에서 멘션 검색
+      if (!found && q.tail) found = q.tail.includes(mentionPat);
+      // 5) 폴백: kw 키워드에서 텍스트 검색
+      if (!found && q.kw) found = q.kw.toLowerCase().includes(tLow);
+      // 6) 폴백: 전체 JSON stringify 검색
+      if (!found) found = JSON.stringify(q).toLowerCase().indexOf(tLow) !== -1;
+      if (found) usedIn.push(q);
     });
-    if (usedIn.length === 0 && allQ.length > 0) {
-      console.log('[EP-DEBUG] tag="' + epTag + '" trim="' + t + '" qCount=' + allQ.length);
-      allQ.forEach(function(q, i) {
-        var s = JSON.stringify(q).toLowerCase();
-        if (s.indexOf(t.charAt(0)) !== -1) console.log('[EP-DEBUG] partial match q[' + i + ']:', q.q, '→', s.substring(0, 200));
-      });
-    }
     return { count: usedIn.length, usedIn: usedIn };
   };
 
