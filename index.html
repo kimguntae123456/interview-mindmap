@@ -3466,29 +3466,30 @@ function EpisodeManagerView() {
 
   var usageDetailFn = function(epTag) {
     var t = epTag.trim();
-    var tLow = t.toLowerCase();
     var mentionPat = '[@' + t + ']';
     var atPat = '@' + t;
     var usedIn = [];
     var allQ = state.questions || [];
-    // customNodes에서 질문별 답변 노드 매핑
+    // customNodes(답변 노드)를 질문별로 매핑
     var cnByQ = {};
     (state.customNodes || []).forEach(function(cn) {
       var rootQ = cn.rootQId || cn.parentId;
       if (rootQ) { if (!cnByQ[rootQ]) cnByQ[rootQ] = []; cnByQ[rootQ].push(cn); }
     });
+    // @멘션 검색 헬퍼: [@태그] 또는 @태그 패턴만 매칭
+    var hasMention = function(text) {
+      return text && (text.includes(mentionPat) || text.includes(atPat));
+    };
     allQ.forEach(function(q) {
-      // 1) customNodes(답변 노드) label에서 [@태그] 또는 @태그 검색
+      // 1) customNodes(답변 노드) label에서 @멘션 검색
       var nodes = cnByQ[q.id] || [];
-      var found = nodes.some(function(cn) { return cn.label && (cn.label.includes(mentionPat) || cn.label.includes(atPat) || cn.label.toLowerCase().includes(tLow)); });
-      // 2) answers 배열에서 멘션 검색
-      if (!found) found = (q.answers || []).some(function(a) { return a && (a.includes(mentionPat) || a.includes(atPat) || a.toLowerCase().includes(tLow)); });
-      // 3) scripts 내용에서 멘션 검색
-      if (!found) found = (q.scripts || []).some(function(sc) { return sc && sc.content && (sc.content.includes(mentionPat) || sc.content.includes(atPat) || sc.content.toLowerCase().includes(tLow)); });
-      // 4) fullAnswer, tail, kw
-      if (!found && q.fullAnswer) found = q.fullAnswer.toLowerCase().includes(tLow);
-      if (!found && q.tail) found = q.tail.toLowerCase().includes(tLow);
-      if (!found && q.kw) found = q.kw.toLowerCase().includes(tLow);
+      var found = nodes.some(function(cn) { return hasMention(cn.label); });
+      // 2) answers 배열에서 @멘션 검색
+      if (!found) found = (q.answers || []).some(function(a) { return hasMention(a); });
+      // 3) scripts 내용에서 @멘션 검색
+      if (!found) found = (q.scripts || []).some(function(sc) { return sc && hasMention(sc.content); });
+      // 4) fullAnswer, tail에서 @멘션 검색
+      if (!found) found = hasMention(q.fullAnswer) || hasMention(q.tail);
       if (found) usedIn.push(q);
     });
     return { count: usedIn.length, usedIn: usedIn };
