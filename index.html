@@ -508,8 +508,9 @@ html, body { height:100%; overflow:hidden; background:var(--bg); color:var(--tex
 .ep-script-label .ep-sc-chars { font-size: 9px; color: var(--text3); font-family: 'Geist Mono', ui-monospace, monospace; white-space: nowrap; }
 .ep-script-label button { background: transparent; border: none; color: var(--text3); cursor: pointer; font-size: 13px; padding: 0 2px; }
 .ep-script-label button:hover { color: var(--text); }
-.ep-script-block textarea, .ep-script-block .fmt-preview { width: 100%; border: 1px solid var(--border); border-radius: 4px; padding: 6px 8px; font-size: 13px; line-height: 1.5; outline: none; background: var(--surface); resize: none; overflow: hidden; font-family: var(--font); color: var(--text); box-shadow: var(--shadow-inset); letter-spacing: 0.1px; min-height: 36px; }
-.ep-script-block textarea:focus, .ep-script-block .fmt-preview:focus { border-color: var(--text); }
+.ep-script-block textarea { width: 100%; border: 1px solid var(--border); border-radius: 4px; padding: 6px 8px; font-size: 13px; line-height: 1.5; outline: none; background: var(--surface); resize: none; overflow: hidden; font-family: var(--font); color: var(--text); box-shadow: var(--shadow-inset); letter-spacing: 0.1px; min-height: 36px; }
+.ep-script-block .fmt-preview { width: 100%; border: 1px solid var(--border); border-radius: 4px; padding: 6px 8px; font-size: 13px; line-height: 1.5; outline: none; background: var(--surface); font-family: var(--font); color: var(--text); box-shadow: var(--shadow-inset); letter-spacing: 0.1px; min-height: 36px; }
+.ep-script-block textarea:focus { border-color: var(--text); }
 .ep-add-script { align-self: flex-start; font-size: 11px; font-weight: 500; padding: 3px 12px; border: 1px dashed var(--border); background: transparent; border-radius: 999px; cursor: pointer; color: var(--text2); font-family: var(--font); }
 .ep-add-script:hover { border-style: solid; color: var(--text); }
 .ep-card-foot { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--text3); flex-wrap: wrap; }
