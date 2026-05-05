@@ -533,7 +533,8 @@ html, body { height:100%; overflow:hidden; background:var(--bg); color:var(--tex
 .fmt-bold { font-weight: 700; }
 .fmt-highlight { background: #fff3a8; padding: 1px 2px; border-radius: 2px; }
 html[data-theme="dark"] .fmt-highlight { background: #5c4b00; color: #ffe066; }
-.fmt-mention { color: var(--accent); font-weight: 500; }
+.fmt-mention { color: var(--accent); font-weight: 500; position: relative; cursor: pointer; }
+.fmt-mention[data-tip]:hover::after { content: attr(data-tip); position: absolute; left: 0; top: 100%; margin-top: 4px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-size: 13px; line-height: 1.55; font-weight: 400; white-space: pre-wrap; width: 340px; max-height: 300px; overflow-y: auto; z-index: 999; box-shadow: 0 4px 20px rgba(0,0,0,0.12); pointer-events: none; }
 
 /* ─── Formatted Preview Overlay ─── */
 .fmt-preview { cursor: text; white-space: pre-wrap; word-break: break-word; }
@@ -2561,7 +2562,20 @@ function formatRendered(text) {
     } else if (m[3]) {
       parts.push(React.createElement('span', { className: 'fmt-highlight', key: 'h'+m.index }, m[4]));
     } else if (m[5]) {
-      parts.push(React.createElement('span', { className: 'fmt-mention', key: 'm'+m.index }, m[6]));
+      var _mTag = m[6];
+      var _mTip = '';
+      try {
+        var _mEps = MMStars.get();
+        var _mEp = _mEps.find(function(ep){ return ep.tag === _mTag; });
+        if (_mEp && _mEp.scripts && _mEp.scripts.length > 0) {
+          _mTip = _mEp.scripts.map(function(sc){ return (sc.label||'대본') + ':\n' + (sc.content||'(비어있음)'); }).join('\n\n');
+        } else if (_mEp && _mEp.situation) {
+          _mTip = _mEp.situation;
+        }
+      } catch(e){}
+      var _mProps = { className: 'fmt-mention', key: 'm'+m.index };
+      if (_mTip) _mProps['data-tip'] = _mTip;
+      parts.push(React.createElement('span', _mProps, _mTag));
     }
     last = _fmtRe.lastIndex;
   }
@@ -3368,7 +3382,7 @@ function EpisodeCard({ ep, stars, updateEp, removeEp, updateScripts, usageDetail
         <span className="ep-usage">{usage.count}회</span>
         {usage.usedIn.length > 0 && (
           <div className="ep-used-pills">
-            {(expanded ? usage.usedIn : usage.usedIn.slice(0, 3)).map(function(uq) {
+            {usage.usedIn.map(function(uq) {
               var cat = MM_DATA.categories.find(function(c){return c.id===uq.cat;});
               return React.createElement('span', {
                 key: uq.id, className: 'ep-used-pill',
@@ -3379,10 +3393,6 @@ function EpisodeCard({ ep, stars, updateEp, removeEp, updateScripts, usageDetail
                 uq.q
               );
             })}
-            {!expanded && usage.usedIn.length > 3 && React.createElement('span', {
-              className: 'ep-used-pill', style: {cursor:'pointer', fontWeight:600},
-              onClick: function(e){ e.stopPropagation(); setExpanded(true); }
-            }, '+' + (usage.usedIn.length - 3))}
           </div>
         )}
       </div>
