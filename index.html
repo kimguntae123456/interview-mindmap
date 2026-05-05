@@ -3286,20 +3286,7 @@ const EP_MODES = [
   { key: 'brief', label: '축약형', placeholder: '핵심 키워드와 요약만 간결하게...' },
 ];
 
-function EpAutoTextarea({ value, onChange, placeholder }) {
-  var ref = React.useRef(null);
-  React.useEffect(function() {
-    if (!ref.current) return;
-    ref.current.style.height = 'auto';
-    ref.current.style.height = ref.current.scrollHeight + 'px';
-  }, [value]);
-  return React.createElement('textarea', {
-    ref: ref, value: value || '', placeholder: placeholder,
-    onChange: onChange, rows: 1
-  });
-}
-
-function EpisodeCard({ ep, stars, updateEp, removeEp, updateScripts, usageDetail, onDragStart, onDragOver, onDragEnd, onDrop }) {
+function EpisodeCard({ ep, stars, updateEp, removeEp, updateScripts, usageDetail, onDragStart, onDragOver, onDragEnd, onDrop, epCategories }) {
   var star = stars[ep.id] || {};
   var scripts = star.scripts || [
     { id: 'sc_full', label: '완전형(대본)', content: '' },
@@ -3343,8 +3330,15 @@ function EpisodeCard({ ep, stars, updateEp, removeEp, updateScripts, usageDetail
         <button className="ep-card-del" title="삭제" onClick={function(){removeEp(ep.id);}}>×</button>
       </div>
 
-      <input className="ep-desc-input" value={ep.desc || ''} placeholder="한줄 설명"
-             onChange={function(e){updateEp(ep.id, function(x){x.desc=e.target.value;});}} />
+      <div style={{display:'flex', gap:6, alignItems:'center'}}>
+        <select style={{flex:'0 0 auto', padding:'4px 8px', fontSize:11, border:'1px solid var(--border)', borderRadius:6, background:'var(--surface)', color:'var(--text)', fontFamily:'var(--font)', outline:'none'}}
+                value={ep.epCat || ''} onChange={function(e){updateEp(ep.id, function(x){x.epCat=e.target.value;});}}>
+          <option value="">미분류</option>
+          {(epCategories||[]).map(function(c){ return React.createElement('option', {key:c, value:c}, c); })}
+        </select>
+        <input className="ep-desc-input" style={{flex:1}} value={ep.desc || ''} placeholder="한줄 설명"
+               onChange={function(e){updateEp(ep.id, function(x){x.desc=e.target.value;});}} />
+      </div>
 
       {/* 모든 대본 동시 표시 */}
       <div className="ep-scripts">
@@ -3359,8 +3353,8 @@ function EpisodeCard({ ep, stars, updateEp, removeEp, updateScripts, usageDetail
                   <button title="삭제" onClick={function(){ if(confirm('이 대본을 삭제할까요?')) removeScript(idx); }}>×</button>
                 )}
               </div>
-              <EpAutoTextarea value={sc.content || ''} placeholder={(sc.label||'대본') + ' 작성...'}
-                             onChange={function(e){ updateScript(idx, 'content', e.target.value); }} />
+              <MentionTextarea value={sc.content || ''} placeholder={(sc.label||'대본') + ' 작성...'} autoResize
+                               onChange={function(e){ updateScript(idx, 'content', e.target.value); }} />
             </div>
           );
         })}
@@ -3401,10 +3395,16 @@ function EpisodeManagerView() {
   var stars = stStars[0]; var setStars = stStars[1];
   var stFilter = React.useState('');
   var filter = stFilter[0]; var setFilter = stFilter[1];
+  var stCatFilter = React.useState('all');
+  var catFilter = stCatFilter[0]; var setCatFilter = stCatFilter[1];
   var stDrag = React.useState(null);
   var dragId = stDrag[0]; var setDragId = stDrag[1];
   var stOver = React.useState(null);
   var overId = stOver[0]; var setOverId = stOver[1];
+  var stAddingCat = React.useState(false);
+  var addingCat = stAddingCat[0]; var setAddingCat = stAddingCat[1];
+  var stNewCat = React.useState('');
+  var newCatName = stNewCat[0]; var setNewCatName = stNewCat[1];
 
   React.useEffect(function() { return MMStore.subscribe(function(s) { setState({...s}); }); }, []);
   React.useEffect(function() { return MMStars.subscribe(function() { setStars(MMStars.get()); }); }, []);
@@ -3412,10 +3412,35 @@ function EpisodeManagerView() {
   var tabSwitch = function(tab) { window.location.hash = '#' + tab; };
   var episodes = state.episodes || [];
 
+  // 에피소드 카테고리
+  var epCategories = React.useMemo(function() {
+    try { return JSON.parse(localStorage.getItem('mm-ep-categories')) || []; } catch(e) { return []; }
+  }, [state]);
+  var saveEpCats = function(cats) {
+    localStorage.setItem('mm-ep-categories', JSON.stringify(cats));
+    MMStore.update(function(s){}); // trigger re-render
+  };
+  var addEpCat = function(name) {
+    if (!name.trim()) return;
+    var cats = epCategories.slice();
+    if (cats.indexOf(name.trim()) < 0) cats.push(name.trim());
+    saveEpCats(cats);
+  };
+  var removeEpCat = function(name) {
+    saveEpCats(epCategories.filter(function(c){ return c !== name; }));
+  };
+
   var filtered = React.useMemo(function() {
-    if (!filter.trim()) return episodes;
+    var eps = episodes;
+    if (catFilter !== 'all') {
+      eps = eps.filter(function(ep) {
+        if (catFilter === '') return !ep.epCat || ep.epCat === '';
+        return ep.epCat === catFilter;
+      });
+    }
+    if (!filter.trim()) return eps;
     var t = filter.toLowerCase();
-    return episodes.filter(function(ep) {
+    return eps.filter(function(ep) {
       if (ep.tag.toLowerCase().includes(t)) return true;
       if (ep.desc && ep.desc.toLowerCase().includes(t)) return true;
       var star = stars[ep.id] || {};
@@ -3425,7 +3450,7 @@ function EpisodeManagerView() {
       if ((star.briefScript||'').toLowerCase().includes(t)) return true;
       return false;
     });
-  }, [episodes, filter, stars]);
+  }, [episodes, filter, stars, catFilter]);
 
   var usageDetailFn = function(epTag) {
     var re = new RegExp('\\[@' + epTag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\]');
@@ -3450,7 +3475,7 @@ function EpisodeManagerView() {
     var newId = 'ep_' + Date.now().toString(36);
     MMStore.update(function(s) {
       s.episodes = s.episodes || [];
-      s.episodes.push({ id: newId, tag: '새에피소드', desc: '한줄 설명', emoji: '\uD83D\uDCCC' });
+      s.episodes.push({ id: newId, tag: '새에피소드', desc: '한줄 설명', emoji: '\uD83D\uDCCC', epCat: (catFilter !== 'all' ? catFilter : '') });
     });
     MMStars.setEntry(newId, { scripts: [
       { id: 'sc_full', label: '완전형(대본)', content: '' },
@@ -3525,8 +3550,32 @@ function EpisodeManagerView() {
 
       <div className="ep-wrap">
         <div className="ep-toolbar">
-          <input className="search" placeholder="태그·설명·내용 검색..." value={filter} onChange={function(e){setFilter(e.target.value);}} style={{width:260}} />
+          <input className="search" placeholder="태그·설명·내용 검색..." value={filter} onChange={function(e){setFilter(e.target.value);}} style={{width:220}} />
           <div className="ep-stats">{filledEp}/{totalEp} 정리됨</div>
+        </div>
+        <div style={{display:'flex', gap:6, flexWrap:'wrap', marginBottom:16, alignItems:'center'}}>
+          <button className={"filter-chip" + (catFilter==='all'?' active':'')} onClick={function(){setCatFilter('all');}}>전체</button>
+          <button className={"filter-chip" + (catFilter===''?' active':'')} onClick={function(){setCatFilter(catFilter===''?'all':'');}}>미분류</button>
+          {epCategories.map(function(c) {
+            return React.createElement('button', {
+              key: c, className: 'filter-chip' + (catFilter===c?' active':''),
+              onClick: function(){ setCatFilter(catFilter===c?'all':c); },
+              onContextMenu: function(e){ e.preventDefault(); if(confirm(c+' 카테고리를 삭제할까요?')) removeEpCat(c); }
+            }, c, React.createElement('span', {className:'cnt'}, episodes.filter(function(ep){return ep.epCat===c;}).length));
+          })}
+          {addingCat ? React.createElement('span', {style:{display:'inline-flex', gap:4, alignItems:'center'}},
+            React.createElement('input', {
+              style:{padding:'4px 8px', borderRadius:20, border:'1px solid var(--border)', background:'var(--surface)', color:'var(--text)', fontSize:12, width:100},
+              placeholder:'카테고리명', value:newCatName, autoFocus:true,
+              onChange:function(e){setNewCatName(e.target.value);},
+              onKeyDown:function(e){if(e.key==='Enter'){addEpCat(newCatName);setNewCatName('');setAddingCat(false);} if(e.key==='Escape')setAddingCat(false);}
+            }),
+            React.createElement('button', {className:'filter-chip', onClick:function(){addEpCat(newCatName);setNewCatName('');setAddingCat(false);}}, '확인'),
+            React.createElement('button', {className:'filter-chip', onClick:function(){setAddingCat(false);}}, '취소')
+          ) : React.createElement('button', {
+            className:'filter-chip', style:{borderStyle:'dashed', opacity:0.6},
+            onClick:function(){setAddingCat(true);}
+          }, '+ 카테고리')}
         </div>
 
         <div className="ep-grid">
@@ -3537,7 +3586,8 @@ function EpisodeManagerView() {
               updateScripts: updateScripts,
               usageDetail: usageDetailFn,
               onDragStart: onDragStart, onDragOver: onDragOver,
-              onDragEnd: onDragEnd, onDrop: onDrop
+              onDragEnd: onDragEnd, onDrop: onDrop,
+              epCategories: epCategories
             });
           })}
           {filtered.length === 0 && (
