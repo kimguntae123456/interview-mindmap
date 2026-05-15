@@ -572,6 +572,14 @@ html[data-theme="dark"] .exp-canvas { background: repeating-linear-gradient(0deg
 .exp-node-summary { font-size: 11px; color: var(--text2); line-height: 1.5; }
 .exp-node-meta { display: flex; align-items: center; justify-content: space-between; font-size: 10px; color: var(--text3); font-family: 'Geist Mono', ui-monospace, monospace; margin-top: 4px; padding-top: 8px; border-top: 1px dashed var(--border); }
 .exp-node-open { color: var(--text); font-weight: 600; }
+.exp-canvas-svg { position: absolute; top:0; left:0; pointer-events:none; z-index:0; }
+.exp-subnode { position: absolute; max-width: 220px; min-width: 80px; padding: 7px 24px 7px 12px; background: var(--surface); border: 1px solid var(--text3); border-radius: 999px; font-size: 11px; line-height: 1.35; color: var(--text); cursor: grab; user-select: none; box-shadow: 0 1px 4px rgba(0,0,0,0.08); z-index: 2; display: flex; align-items: center; gap: 4px; transition: border-color .15s, box-shadow .15s; }
+.exp-subnode:hover { border-color: var(--text); box-shadow: 0 2px 10px rgba(0,0,0,0.15); }
+.exp-subnode:active { cursor: grabbing; }
+.exp-subnode-q { flex:1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.exp-subnode-del { position: absolute; top: 50%; right: 4px; transform: translateY(-50%); width: 16px; height: 16px; border-radius: 50%; background: transparent; border: none; color: var(--text3); cursor: pointer; font-size: 12px; padding: 0; line-height: 1; display: flex; align-items: center; justify-content: center; }
+.exp-subnode-del:hover { background: var(--text); color: var(--bg); }
+.exp-node, .exp-subnode { z-index: 2; }
 
 /* 모달 */
 .exp-modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 700; display: flex; align-items: center; justify-content: center; padding: 28px; animation: exp-modal-fade 0.15s ease-out; }
@@ -2629,6 +2637,29 @@ function SelectionPopover() {
     setPopover(null);
   }
 
+  function doAddFollowup() {
+    if (!popover || !popover.target) return;
+    var card = popover.target.closest && popover.target.closest('.exp-card[data-exp-id]');
+    var exId = card ? card.getAttribute('data-exp-id') : null;
+    if (!exId) { alert('경험 카드(자소서/인턴/활동) 안의 텍스트를 선택해주세요.'); setPopover(null); return; }
+    var text = (popover.text || '').trim();
+    if (!text) { setPopover(null); return; }
+    if (window.MMStore) {
+      window.MMStore.update(function(s) {
+        var ex = (s.experiences||[]).find(function(e){return e.id===exId;});
+        if (!ex) return;
+        ex.followups = ex.followups || [];
+        ex.followups.push({ id: 'fu_'+Date.now().toString(36), q: text, a: '' });
+      });
+    }
+    setPopover(null);
+  }
+
+  function isInsideExpCard() {
+    if (!popover || !popover.target || !popover.target.closest) return false;
+    return !!popover.target.closest('.exp-card[data-exp-id]');
+  }
+
   if (!popover) return null;
   var left = Math.max(10, Math.min(popover.x - 90, window.innerWidth - 200));
   var top = Math.max(10, popover.y - 38);
@@ -2648,6 +2679,11 @@ function SelectionPopover() {
       React.createElement('button', { onMouseDown: function(e){ e.preventDefault(); doExcerpt(); }, title: '발췌 모음에 추가' },
         React.createElement('span', { className: 'sel-icon' }, '\uD83D\uDCCB'),
         '발췌'
+      ),
+      isInsideExpCard() && React.createElement('div', { className: 'sel-divider' }),
+      isInsideExpCard() && React.createElement('button', { onMouseDown: function(e){ e.preventDefault(); doAddFollowup(); }, title: '선택 텍스트를 예상 꼬리질문 노드로 추가' },
+        React.createElement('span', { className: 'sel-icon' }, '🌱'),
+        '꼬리질문'
       )
     ),
     document.body
@@ -3901,18 +3937,18 @@ function ExperienceManagerView() {
 
   var defaultPos = function(idx) { return { x: 40 + (idx % 3) * 320, y: 40 + Math.floor(idx / 3) * 220 }; };
 
-  var startNodeDrag = function(e, exId, idx) {
+  var startDragKey = function(e, key, fallback) {
     if (e.target.closest('button, input, textarea, .exp-node-open')) return;
-    e.preventDefault();
+    e.preventDefault(); e.stopPropagation();
     var startX = e.clientX, startY = e.clientY;
-    var startPos = positions[exId] || defaultPos(idx);
-    dragRef.current = { exId: exId, moved: false, x: startPos.x, y: startPos.y };
+    var startPos = positions[key] || fallback;
+    dragRef.current = { key: key, moved: false, x: startPos.x, y: startPos.y };
     var onMove = function(ev) {
       var dx = ev.clientX - startX, dy = ev.clientY - startY;
       if (!dragRef.current.moved && Math.abs(dx) + Math.abs(dy) > 4) dragRef.current.moved = true;
       var nx = startPos.x + dx, ny = startPos.y + dy;
       dragRef.current.x = nx; dragRef.current.y = ny;
-      setPositions(function(p) { var n = Object.assign({}, p); n[exId] = { x: nx, y: ny }; return n; });
+      setPositions(function(p) { var n = Object.assign({}, p); n[key] = { x: nx, y: ny }; return n; });
     };
     var onUp = function() {
       window.removeEventListener('pointermove', onMove);
@@ -3925,6 +3961,13 @@ function ExperienceManagerView() {
     window.addEventListener('pointermove', onMove);
     window.addEventListener('pointerup', onUp);
   };
+  var startNodeDrag = function(e, exId, idx) { startDragKey(e, exId, defaultPos(idx)); };
+
+  var defaultChildPos = function(parentPos, i, total) {
+    var angle = (i / Math.max(total,1)) * Math.PI * 2 - Math.PI/2;
+    var r = 200;
+    return { x: parentPos.x + 140 + Math.cos(angle) * r - 75, y: parentPos.y + 55 + Math.sin(angle) * r - 18 };
+  };
 
   var resetPositions = function() {
     if (!confirm('자소서 노드 위치를 초기화할까요?')) return;
@@ -3935,7 +3978,7 @@ function ExperienceManagerView() {
   var renderExpCard = function(ex) {
     var isCol = !!collapsed[ex.id];
     return (
-      <div key={ex.id} className="exp-card">
+      <div key={ex.id} className="exp-card" data-exp-id={ex.id}>
         <div className="exp-card-head">
           <span className="exp-type" data-type={ex.type}>{ex.type}</span>
           <input className="exp-title-input" value={ex.title || ''} onChange={function(e){ var v=e.target.value; updateExp(ex.id, function(x){x.title=v;}); }} />
@@ -4031,21 +4074,50 @@ function ExperienceManagerView() {
               <button className="btn" onClick={resetPositions}>위치 초기화</button>
             </div>
             <div className="exp-canvas">
+              <svg className="exp-canvas-svg" width="3000" height="2000">
+                {filtered.map(function(ex, idx) {
+                  var ppos = positions[ex.id] || defaultPos(idx);
+                  var pcx = ppos.x + 140, pcy = ppos.y + 55;
+                  var fus = ex.followups || [];
+                  return fus.map(function(fu, fi) {
+                    var cpos = positions['fu:'+fu.id] || defaultChildPos(ppos, fi, fus.length);
+                    var ccx = cpos.x + 75, ccy = cpos.y + 18;
+                    var mx = (pcx + ccx) / 2, my = (pcy + ccy) / 2;
+                    return <path key={fu.id} d={"M "+pcx+" "+pcy+" Q "+mx+" "+pcy+" "+ccx+" "+ccy} stroke="var(--text3)" strokeWidth="1.5" fill="none" strokeDasharray="3,4" opacity="0.6" />;
+                  });
+                })}
+              </svg>
               {filtered.map(function(ex, idx) {
                 var pos = positions[ex.id] || defaultPos(idx);
+                var fus = ex.followups || [];
                 return (
-                  <div key={ex.id} className="exp-node"
-                    style={{left:pos.x, top:pos.y}}
-                    onPointerDown={function(e){ startNodeDrag(e, ex.id, idx); }}
-                    onClick={function(){ if (!dragRef.current || !dragRef.current.moved) setSelected(ex.id); }}>
-                    <span className="exp-type" data-type={ex.type}>{ex.type}</span>
-                    <div className="exp-node-title">{ex.title}</div>
-                    {ex.summary && <div className="exp-node-summary">{ex.summary}</div>}
-                    <div className="exp-node-meta">
-                      <span>꼬리질문 {(ex.followups||[]).length}</span>
-                      <span className="exp-node-open">열기 ↗</span>
+                  <React.Fragment key={ex.id}>
+                    <div className="exp-node"
+                      style={{left:pos.x, top:pos.y}}
+                      onPointerDown={function(e){ startNodeDrag(e, ex.id, idx); }}
+                      onClick={function(){ if (!dragRef.current || !dragRef.current.moved) setSelected(ex.id); }}>
+                      <span className="exp-type" data-type={ex.type}>{ex.type}</span>
+                      <div className="exp-node-title">{ex.title}</div>
+                      {ex.summary && <div className="exp-node-summary">{ex.summary}</div>}
+                      <div className="exp-node-meta">
+                        <span>꼬리질문 {fus.length}</span>
+                        <span className="exp-node-open">열기 ↗</span>
+                      </div>
                     </div>
-                  </div>
+                    {fus.map(function(fu, fi) {
+                      var cpos = positions['fu:'+fu.id] || defaultChildPos(pos, fi, fus.length);
+                      return (
+                        <div key={fu.id} className="exp-subnode"
+                          style={{left:cpos.x, top:cpos.y}}
+                          onPointerDown={function(e){ startDragKey(e, 'fu:'+fu.id, defaultChildPos(pos, fi, fus.length)); }}
+                          onClick={function(){ if (!dragRef.current || !dragRef.current.moved) setSelected(ex.id); }}
+                          title={fu.q + (fu.a ? '\n\n→ '+fu.a : '')}>
+                          <span className="exp-subnode-q">{fu.q || '(빈 꼬리질문)'}</span>
+                          <button className="exp-subnode-del" title="삭제" onPointerDown={function(e){ e.stopPropagation(); }} onClick={function(e){ e.stopPropagation(); if(confirm('이 꼬리질문을 삭제할까요?')) removeFollowup(ex.id, fu.id); }}>×</button>
+                        </div>
+                      );
+                    })}
+                  </React.Fragment>
                 );
               })}
               {filtered.length === 0 && <div style={{padding:40, textAlign:'center', color:'var(--text3)', fontSize:13}}>자소서 카드가 없습니다.</div>}
