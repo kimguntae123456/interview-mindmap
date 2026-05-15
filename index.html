@@ -559,6 +559,29 @@ html[data-theme="dark"] .exp-type[data-type="활동"]   { background: #581c87; c
 .exp-add-fu:hover { border-style: solid; color: var(--text); }
 .exp-fu-count { font-size: 10px; color: var(--text3); font-family: 'Geist Mono', ui-monospace, monospace; }
 
+/* ─── 자소서 캔버스 모드 ─── */
+.exp-canvas-wrap { display: flex; flex-direction: column; gap: 12px; }
+.exp-canvas-hint { display: flex; align-items: center; gap: 12px; font-size: 12px; color: var(--text3); padding: 8px 14px; background: var(--color-powder); border: 1px dashed var(--border); border-radius: 10px; }
+.exp-canvas-hint > span { flex: 1; }
+.exp-canvas { position: relative; min-height: 720px; background: repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(0,0,0,0.04) 39px, rgba(0,0,0,0.04) 40px), repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(0,0,0,0.04) 39px, rgba(0,0,0,0.04) 40px); border: 1px solid var(--border); border-radius: 12px; overflow: auto; padding-bottom: 40px; touch-action: none; }
+html[data-theme="dark"] .exp-canvas { background: repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,0.05) 39px, rgba(255,255,255,0.05) 40px), repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255,255,255,0.05) 39px, rgba(255,255,255,0.05) 40px); }
+.exp-node { position: absolute; width: 280px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); cursor: grab; user-select: none; transition: box-shadow .15s, border-color .15s, transform .1s; }
+.exp-node:hover { border-color: var(--text2); box-shadow: 0 4px 18px rgba(0,0,0,0.12); transform: translateY(-1px); }
+.exp-node:active { cursor: grabbing; }
+.exp-node-title { font-family: var(--font-display); font-size: 15px; font-weight: 500; letter-spacing: -0.01em; color: var(--text); line-height: 1.35; }
+.exp-node-summary { font-size: 11px; color: var(--text2); line-height: 1.5; }
+.exp-node-meta { display: flex; align-items: center; justify-content: space-between; font-size: 10px; color: var(--text3); font-family: 'Geist Mono', ui-monospace, monospace; margin-top: 4px; padding-top: 8px; border-top: 1px dashed var(--border); }
+.exp-node-open { color: var(--text); font-weight: 600; }
+
+/* 모달 */
+.exp-modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 700; display: flex; align-items: center; justify-content: center; padding: 28px; animation: exp-modal-fade 0.15s ease-out; }
+@keyframes exp-modal-fade { from { opacity: 0; } to { opacity: 1; } }
+.exp-modal { background: var(--bg); border: 1px solid var(--border); border-radius: 16px; max-width: 760px; width: 100%; max-height: calc(100vh - 56px); overflow-y: auto; padding: 20px 22px 22px; position: relative; box-shadow: 0 12px 48px rgba(0,0,0,0.25); animation: exp-modal-pop 0.18s ease-out; }
+@keyframes exp-modal-pop { from { transform: translateY(8px) scale(.98); opacity:0; } to { transform: none; opacity:1; } }
+.exp-modal-close { position: absolute; top: 12px; right: 14px; background: transparent; border: 1px solid var(--border); border-radius: 999px; width: 28px; height: 28px; cursor: pointer; font-size: 16px; color: var(--text2); display: flex; align-items: center; justify-content: center; z-index: 1; }
+.exp-modal-close:hover { color: var(--bg); background: var(--text); border-color: var(--text); }
+.exp-modal .exp-card { border: none; padding: 0; box-shadow: none; gap: 14px; }
+
 /* ─── Selection Popover ─── */
 .sel-popover { position: fixed; z-index: 600; display: flex; gap: 2px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 4px; box-shadow: 0 4px 16px rgba(0,0,0,0.15); animation: sel-pop-in 0.12s ease-out; }
 @keyframes sel-pop-in { from { opacity:0; transform: translateY(4px); } to { opacity:1; transform: translateY(0); } }
@@ -3863,6 +3886,93 @@ function ExperienceManagerView() {
 
   var types = ['all', '자소서', '인턴', '활동'];
 
+  // ── 자소서 캔버스 모드 상태 ──
+  var stPositions = React.useState(function() {
+    try { return JSON.parse(localStorage.getItem('mm-exp-positions')) || {}; } catch(e) { return {}; }
+  });
+  var positions = stPositions[0]; var setPositions = stPositions[1];
+  var stSelected = React.useState(null);
+  var selected = stSelected[0]; var setSelected = stSelected[1];
+  var dragRef = React.useRef(null);
+
+  var savePositions = function(nextMap) {
+    try { localStorage.setItem('mm-exp-positions', JSON.stringify(nextMap)); } catch(e) {}
+  };
+
+  var defaultPos = function(idx) { return { x: 40 + (idx % 3) * 320, y: 40 + Math.floor(idx / 3) * 220 }; };
+
+  var startNodeDrag = function(e, exId, idx) {
+    if (e.target.closest('button, input, textarea, .exp-node-open')) return;
+    e.preventDefault();
+    var startX = e.clientX, startY = e.clientY;
+    var startPos = positions[exId] || defaultPos(idx);
+    dragRef.current = { exId: exId, moved: false, x: startPos.x, y: startPos.y };
+    var onMove = function(ev) {
+      var dx = ev.clientX - startX, dy = ev.clientY - startY;
+      if (!dragRef.current.moved && Math.abs(dx) + Math.abs(dy) > 4) dragRef.current.moved = true;
+      var nx = startPos.x + dx, ny = startPos.y + dy;
+      dragRef.current.x = nx; dragRef.current.y = ny;
+      setPositions(function(p) { var n = Object.assign({}, p); n[exId] = { x: nx, y: ny }; return n; });
+    };
+    var onUp = function() {
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+      if (dragRef.current && dragRef.current.moved) {
+        setPositions(function(p) { savePositions(p); return p; });
+      }
+      dragRef.current = null;
+    };
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+  };
+
+  var resetPositions = function() {
+    if (!confirm('자소서 노드 위치를 초기화할까요?')) return;
+    setPositions({});
+    try { localStorage.removeItem('mm-exp-positions'); } catch(e) {}
+  };
+
+  var renderExpCard = function(ex) {
+    var isCol = !!collapsed[ex.id];
+    return (
+      <div key={ex.id} className="exp-card">
+        <div className="exp-card-head">
+          <span className="exp-type" data-type={ex.type}>{ex.type}</span>
+          <input className="exp-title-input" value={ex.title || ''} onChange={function(e){ var v=e.target.value; updateExp(ex.id, function(x){x.title=v;}); }} />
+          {ex.period && <span className="exp-period">{ex.period}</span>}
+          <button className="exp-card-del" title="삭제" onClick={function(){removeExp(ex.id);}}>×</button>
+        </div>
+        <input className="exp-summary" placeholder="한 줄 요약 (선택)" value={ex.summary || ''} onChange={function(e){ var v=e.target.value; updateExp(ex.id, function(x){x.summary=v;}); }} style={{fontSize:12, fontFamily:'inherit'}} />
+        <div className="exp-section-label">
+          <span>자소서 본문 / 경험 내용</span>
+          <button className="exp-toggle" onClick={function(){toggleBody(ex.id);}}>{isCol ? '펼치기' : '접기'}</button>
+        </div>
+        {!isCol && (
+          <div className="exp-body" contentEditable suppressContentEditableWarning
+            onBlur={function(e){ var v=e.currentTarget.innerText; updateExp(ex.id, function(x){x.body=v;}); }}>{ex.body || ''}</div>
+        )}
+        <div className="exp-section-label">
+          <span>예상 꼬리질문</span>
+          <span className="exp-fu-count">{(ex.followups||[]).length}</span>
+        </div>
+        <div className="exp-fu-list">
+          {(ex.followups||[]).map(function(fu){ return (
+            <div key={fu.id} className="exp-fu-item">
+              <input className="exp-fu-q" placeholder="Q. 예상되는 꼬리질문" value={fu.q || ''} onChange={function(e){ updateFollowup(ex.id, fu.id, 'q', e.target.value); }} />
+              <textarea className="exp-fu-a" placeholder="A. 답변 메모 (선택)" value={fu.a || ''} rows={2}
+                onChange={function(e){ updateFollowup(ex.id, fu.id, 'a', e.target.value); var el=e.target; el.style.height='auto'; el.style.height=el.scrollHeight+'px'; }}
+                ref={function(el){ if(el){ el.style.height='auto'; el.style.height=el.scrollHeight+'px'; } }} />
+              <button className="exp-fu-del" title="삭제" onClick={function(){removeFollowup(ex.id, fu.id);}}>×</button>
+            </div>
+          ); })}
+          <button className="exp-add-fu" onClick={function(){addFollowup(ex.id);}}>+ 꼬리질문 추가</button>
+        </div>
+      </div>
+    );
+  };
+
+  var selectedEx = selected ? experiences.find(function(e){return e.id===selected;}) : null;
+
   return (
     <>
       <div className="topbar">
@@ -3914,50 +4024,49 @@ function ExperienceManagerView() {
           </div>
         )}
 
-        <div className="exp-grid">
-          {filtered.map(function(ex) {
-            var isCol = !!collapsed[ex.id];
-            return (
-              <div key={ex.id} className="exp-card">
-                <div className="exp-card-head">
-                  <span className="exp-type" data-type={ex.type}>{ex.type}</span>
-                  <input className="exp-title-input" value={ex.title || ''} onChange={function(e){ var v=e.target.value; updateExp(ex.id, function(x){x.title=v;}); }} />
-                  {ex.period && <span className="exp-period">{ex.period}</span>}
-                  <button className="exp-card-del" title="삭제" onClick={function(){removeExp(ex.id);}}>×</button>
-                </div>
-                {(ex.summary || ex.summary === '') && (
-                  <input className="exp-summary" placeholder="한 줄 요약 (선택)" value={ex.summary || ''} onChange={function(e){ var v=e.target.value; updateExp(ex.id, function(x){x.summary=v;}); }} style={{fontSize:12, fontFamily:'inherit'}} />
-                )}
-                <div className="exp-section-label">
-                  <span>자소서 본문 / 경험 내용</span>
-                  <button className="exp-toggle" onClick={function(){toggleBody(ex.id);}}>{isCol ? '펼치기' : '접기'}</button>
-                </div>
-                {!isCol && (
-                  <div className="exp-body" contentEditable suppressContentEditableWarning
-                    onBlur={function(e){ var v=e.currentTarget.innerText; updateExp(ex.id, function(x){x.body=v;}); }}>{ex.body || ''}</div>
-                )}
-                <div className="exp-section-label">
-                  <span>예상 꼬리질문</span>
-                  <span className="exp-fu-count">{(ex.followups||[]).length}</span>
-                </div>
-                <div className="exp-fu-list">
-                  {(ex.followups||[]).map(function(fu){ return (
-                    <div key={fu.id} className="exp-fu-item">
-                      <input className="exp-fu-q" placeholder="Q. 예상되는 꼬리질문" value={fu.q || ''} onChange={function(e){ updateFollowup(ex.id, fu.id, 'q', e.target.value); }} />
-                      <textarea className="exp-fu-a" placeholder="A. 답변 메모 (선택)" value={fu.a || ''} rows={2}
-                        onChange={function(e){ updateFollowup(ex.id, fu.id, 'a', e.target.value); var el=e.target; el.style.height='auto'; el.style.height=el.scrollHeight+'px'; }}
-                        ref={function(el){ if(el){ el.style.height='auto'; el.style.height=el.scrollHeight+'px'; } }} />
-                      <button className="exp-fu-del" title="삭제" onClick={function(){removeFollowup(ex.id, fu.id);}}>×</button>
+        {typeFilter === '자소서' ? (
+          <div className="exp-canvas-wrap">
+            <div className="exp-canvas-hint">
+              <span>💡 노드를 드래그해서 자유롭게 배치하세요. 카드를 클릭하면 본문과 꼬리질문 편집창이 열립니다.</span>
+              <button className="btn" onClick={resetPositions}>위치 초기화</button>
+            </div>
+            <div className="exp-canvas">
+              {filtered.map(function(ex, idx) {
+                var pos = positions[ex.id] || defaultPos(idx);
+                return (
+                  <div key={ex.id} className="exp-node"
+                    style={{left:pos.x, top:pos.y}}
+                    onPointerDown={function(e){ startNodeDrag(e, ex.id, idx); }}
+                    onClick={function(){ if (!dragRef.current || !dragRef.current.moved) setSelected(ex.id); }}>
+                    <span className="exp-type" data-type={ex.type}>{ex.type}</span>
+                    <div className="exp-node-title">{ex.title}</div>
+                    {ex.summary && <div className="exp-node-summary">{ex.summary}</div>}
+                    <div className="exp-node-meta">
+                      <span>꼬리질문 {(ex.followups||[]).length}</span>
+                      <span className="exp-node-open">열기 ↗</span>
                     </div>
-                  ); })}
-                  <button className="exp-add-fu" onClick={function(){addFollowup(ex.id);}}>+ 꼬리질문 추가</button>
-                </div>
-              </div>
-            );
-          })}
-          {filtered.length === 0 && <div style={{padding:40, textAlign:'center', color:'var(--text3)', fontSize:13}}>일치하는 경험이 없습니다.</div>}
-        </div>
+                  </div>
+                );
+              })}
+              {filtered.length === 0 && <div style={{padding:40, textAlign:'center', color:'var(--text3)', fontSize:13}}>자소서 카드가 없습니다.</div>}
+            </div>
+          </div>
+        ) : (
+          <div className="exp-grid">
+            {filtered.map(renderExpCard)}
+            {filtered.length === 0 && <div style={{padding:40, textAlign:'center', color:'var(--text3)', fontSize:13}}>일치하는 경험이 없습니다.</div>}
+          </div>
+        )}
       </div>
+
+      {selectedEx && (
+        <div className="exp-modal-backdrop" onClick={function(){setSelected(null);}}>
+          <div className="exp-modal" onClick={function(e){e.stopPropagation();}}>
+            <button className="exp-modal-close" onClick={function(){setSelected(null);}}>×</button>
+            {renderExpCard(selectedEx)}
+          </div>
+        </div>
+      )}
     </>
   );
 }
