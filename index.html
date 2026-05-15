@@ -521,6 +521,44 @@ html, body { height:100%; overflow:hidden; background:var(--bg); color:var(--tex
 .ep-used-pill:hover { background: var(--border); }
 .ep-used-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
 
+/* 경험 관리 뷰 */
+.exp-wrap { flex:1; overflow-y:auto; padding:72px 28px 28px; touch-action: pan-y; -webkit-overflow-scrolling: touch; }
+.exp-toolbar { display:flex; align-items:center; gap:12px; margin-bottom:20px; flex-wrap:wrap; }
+.exp-stats { font-size:13px; font-weight:500; color:var(--text2); margin-left:auto; white-space:nowrap; font-family: 'Geist Mono', ui-monospace, Menlo, monospace; }
+.exp-grid { display: grid; grid-template-columns: 1fr; gap: 16px; padding-bottom: 40px; max-width: 920px; margin: 0 auto; }
+.exp-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; box-shadow: var(--shadow-hairline); transition: border-color .15s, box-shadow .15s; }
+.exp-card:focus-within { border-color: var(--text); }
+.exp-card-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.exp-type { font-size: 10px; font-weight: 700; letter-spacing: 0.5px; padding: 3px 8px; border-radius: 999px; background: var(--color-powder); color: var(--text2); border: 1px solid var(--border); flex-shrink: 0; text-transform: uppercase; }
+.exp-type[data-type="자소서"] { background: #ecfeff; color: #0e7490; border-color: #67e8f9; }
+.exp-type[data-type="인턴"]   { background: #fef3c7; color: #92400e; border-color: #fcd34d; }
+.exp-type[data-type="활동"]   { background: #f3e8ff; color: #7e22ce; border-color: #d8b4fe; }
+html[data-theme="dark"] .exp-type[data-type="자소서"] { background: #164e63; color: #67e8f9; }
+html[data-theme="dark"] .exp-type[data-type="인턴"]   { background: #78350f; color: #fcd34d; }
+html[data-theme="dark"] .exp-type[data-type="활동"]   { background: #581c87; color: #d8b4fe; }
+.exp-title-input { flex: 1; min-width: 200px; border: none; border-bottom: 1px solid var(--text); padding: 4px 2px; font-family: var(--font-display); font-size: 18px; font-weight: 400; letter-spacing: -0.02em; outline: none; background: transparent; color: var(--text); }
+.exp-period { font-size: 11px; color: var(--text3); font-family: 'Geist Mono', ui-monospace, Menlo, monospace; }
+.exp-card-del { background: transparent; border: 1px solid var(--border); color: var(--text3); cursor: pointer; font-size: 14px; padding: 2px 8px; border-radius: var(--radius-pill); flex-shrink: 0; }
+.exp-card-del:hover { color: var(--bg); background: var(--text); border-color: var(--text); }
+.exp-summary { font-size: 12px; color: var(--text2); line-height: 1.5; padding: 6px 10px; background: var(--color-powder); border-radius: 6px; border: 1px solid var(--border); }
+.exp-section-label { font-size: 10px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: var(--text2); margin-top: 4px; display: flex; align-items: center; gap: 8px; }
+.exp-section-label .exp-toggle { background:transparent; border:1px solid var(--border); border-radius: 999px; padding: 2px 10px; font-size:10px; cursor:pointer; color: var(--text3); font-family: var(--font); }
+.exp-section-label .exp-toggle:hover { color: var(--text); border-color: var(--text); }
+.exp-body { font-size: 13px; line-height: 1.7; color: var(--text); white-space: pre-wrap; word-break: break-word; padding: 12px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; box-shadow: var(--shadow-inset); }
+.exp-body[contenteditable="true"]:focus { outline: none; border-color: var(--text); }
+.exp-fu-list { display: flex; flex-direction: column; gap: 8px; }
+.exp-fu-item { background: var(--color-powder); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; position: relative; }
+.exp-fu-item:focus-within { border-color: var(--text); }
+.exp-fu-q { width: 100%; border: none; background: transparent; outline: none; font-family: var(--font); font-size: 13px; font-weight: 600; color: var(--text); padding: 2px 24px 2px 0; line-height: 1.4; }
+.exp-fu-q::placeholder { color: var(--text3); font-weight: 400; }
+.exp-fu-a { width: 100%; border: none; background: transparent; outline: none; font-family: var(--font); font-size: 12px; color: var(--text2); line-height: 1.55; resize: none; padding: 2px 0; min-height: 24px; }
+.exp-fu-a::placeholder { color: var(--text3); }
+.exp-fu-del { position: absolute; top: 6px; right: 8px; background: transparent; border: none; color: var(--text3); cursor: pointer; font-size: 13px; padding: 2px 6px; border-radius: 4px; }
+.exp-fu-del:hover { color: var(--text); background: var(--border); }
+.exp-add-fu { align-self: flex-start; font-size: 11px; font-weight: 500; padding: 5px 14px; border: 1px dashed var(--border); background: transparent; border-radius: 999px; cursor: pointer; color: var(--text2); font-family: var(--font); }
+.exp-add-fu:hover { border-style: solid; color: var(--text); }
+.exp-fu-count { font-size: 10px; color: var(--text3); font-family: 'Geist Mono', ui-monospace, monospace; }
+
 /* ─── Selection Popover ─── */
 .sel-popover { position: fixed; z-index: 600; display: flex; gap: 2px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 4px; box-shadow: 0 4px 16px rgba(0,0,0,0.15); animation: sel-pop-in 0.12s ease-out; }
 @keyframes sel-pop-in { from { opacity:0; transform: translateY(4px); } to { opacity:1; transform: translateY(0); } }
@@ -606,7 +644,6 @@ window.MM_DATA = {
     { id: 'c11', name: '기타 인성',       color: '#6366f1' },
     { id: 'c12', name: '서금원',           color: '#10b981' },
     { id: 'c13', name: '산업은행',         color: '#0ea5e9' },
-    { id: 'c14', name: '자소서·경험',       color: '#84cc16' },
   ],
   episodes: [
     { id: 'ep1',  tag: '서브웨이',          desc: '등록금 알바' },
@@ -627,6 +664,29 @@ window.MM_DATA = {
     'ep6': '\u{1F3DA}\uFE0F', 'ep7': '\u{1F4CA}', 'ep8': '\u{1F3AC}', 'ep9': '\u{1F3A4}', 'ep10': '\u{1F4DD}',
     'ep11': '\u{1F5A8}\uFE0F', 'ep12': '\u{1F358}'
   },
+  experiences: [
+    { id:'ex1', type:'\uC790\uC18C\uC11C', title:'\uBB38\uD56D1. \uC9C0\uC6D0\uB3D9\uAE30 & \uC131\uC7A5 \uBC29\uD5A5', period:'', summary:'\uC131\uC7A5 \uAE30\uD68C / \uD6C4\uAE30\uB2E8\uACC4 \uC2A4\uCF00\uC77C\uC5C5 \uC804\uBB38\uAC00', body:`[1-1] \uC0B0\uC5C5\uC740\uD589\uC5D0 \uC9C0\uC6D0\uD55C \uB3D9\uAE30\uB294? (\uD68C\uC0AC \uC120\uD0DD \uAE30\uC900 \uD3EC\uD568)\n\n\uC800\uB294 \uC131\uC7A5\uD560 \uAE30\uD68C\uAC00 \uB9CE\uC740 \uACF3\uC5D0\uC11C \uC77C\uD558\uACE0 \uC2F6\uC2B5\uB2C8\uB2E4.\n\n\uD559\uBD80 \uC2DC\uC808\uBD80\uD130 \uAE30\uC5C5\uC5D0 \uC790\uAE08\uC744 \uC5F0\uACB0\uD558\uB294 \uC77C\uC5D0 \uAD00\uC2EC\uC774 \uC788\uC5C8\uACE0, \uADF8 \uC5F0\uC7A5\uC120\uC5D0\uC11C \uB2F9\uD589 \uC778\uD134\uC5D0 \uC9C0\uC6D0\uD588\uC2B5\uB2C8\uB2E4. \uB2E4\uB9CC \uB2F9\uC2DC\uC5D0\uB294 \uC0B0\uC5C5\uC740\uD589\uC774 \uB2E4\uB978 \uAE08\uC735\uAE30\uAD00\uACFC \uC5B4\uB5BB\uAC8C \uB2E4\uB978\uC9C0\uAE4C\uC9C0\uB294 \uAE4A\uC774 \uC0DD\uAC01\uD574\uBCF4\uC9C0 \uBABB\uD588\uC2B5\uB2C8\uB2E4.\n\n\uC778\uD134 \uADFC\uBB34 \uC911 \uD300\uC7A5\uB2D8\uAED8 \uC0B0\uC5C5\uC740\uD589\uC758 \uD5A5\uD6C4 \uC804\uB9DD\uC744 \uC5EC\uCB64\uBCF8 \uC801\uC774 \uC788\uC2B5\uB2C8\uB2E4. "\uC0C8\uB85C\uC6B4 \uC704\uAE30\uAC00 \uACC4\uC18D \uC0DD\uAE30\uB294 \uD55C, \uD574\uC57C \uD560 \uC77C\uC740 \uB354\uC6B1 \uB9CE\uC544\uC9C8 \uAC83"\uC774\uB77C\uB294 \uB9D0\uC500\uC774 \uC624\uB798 \uB0A8\uC558\uC2B5\uB2C8\uB2E4. \uC0B0\uC5C5\uC740\uD589\uC740 \uC2DC\uC911\uC740\uD589\uC774\uB098 \uD0C0 \uAE30\uAD00\uC774 \uB300\uC2E0\uD560 \uC218 \uC5C6\uB294 \uC815\uCC45\uAE08\uC735\uC758 \uC5ED\uD560\uC744 \uB9E1\uC544\uC654\uACE0, \uADF8 \uC5ED\uD560\uC740 \uC2DC\uB300\uC5D0 \uB9DE\uCDB0 \uACC4\uC18D \uD655\uC7A5\uB418\uC5B4 \uC654\uC2B5\uB2C8\uB2E4. \uBA38\uBB3C\uB7EC \uC788\uC9C0 \uC54A\uB294 \uC870\uC9C1\uC774\uAE30\uC5D0 \uC804\uBB38\uC131\uC744 \uD0A4\uC6B8 \uAE30\uD68C\uB3C4 \uD568\uAED8 \uB298\uC5B4\uB09C\uB2E4\uB294 \uAC83\uC744 \uADF8\uB54C \uAE68\uB2EC\uC558\uC2B5\uB2C8\uB2E4.\n\n\uC120\uBC30\uB2D8\uB4E4\uACFC \uD568\uAED8 \uC77C\uD558\uBA70 \uADF8 \uAE68\uB2EC\uC74C\uC740 \uD655\uC2E0\uC774 \uB410\uC2B5\uB2C8\uB2E4. \uD55C \uC2A4\uD0C0\uD2B8\uC5C5\uC758 \uC131\uC7A5\uC744 \uC704\uD574 \uC5B4\uB5A4 \uBD80\uC11C\uB294 \uD22C\uC790\uC790\uC640 \uAE30\uC5C5\uC744 \uC5F0\uACB0\uD558\uACE0, \uB610 \uB2E4\uB978 \uBD80\uC11C\uB294 \uD380\uB4DC\uB97C \uC870\uC131\uD574 \uC790\uAE08\uC744 \uACF5\uAE09\uD588\uC2B5\uB2C8\uB2E4. \uAC01 \uBD80\uC11C\uC758 \uC5ED\uD560\uC740 \uB2EC\uB790\uC9C0\uB9CC \uBAA8\uB450\uAC00 \uAE30\uC5C5 \uC131\uC7A5\uC774\uB77C\uB294 \uD558\uB098\uC758 \uBAA9\uD45C\uB97C \uD5A5\uD574 \uC6C0\uC9C1\uC774\uACE0 \uC788\uC5C8\uC2B5\uB2C8\uB2E4. \uAD6C\uC131\uC6D0 \uBAA8\uB450\uAC00 \uAC01\uC790\uC758 \uC5ED\uD560\uC5D0 \uC790\uBD80\uC2EC\uC744 \uB290\uB07C\uBA70 \uCEE4\uB9AC\uC5B4\uB97C \uC313\uC544\uAC00\uB294 \uBAA8\uC2B5\uC740 \uD070 \uC601\uAC10\uC744 \uC8FC\uC5C8\uC2B5\uB2C8\uB2E4.\n\n\uC800 \uB610\uD55C \uBCC0\uD654\uC5D0 \uB9DE\uCDB0 \uC0C8\uB85C\uC6B4 \uC5ED\uD560\uC744 \uB9E1\uC544\uAC00\uBA70, \uC804\uBB38\uC131\uC744 \uD0A4\uC6B0\uB294 \uD589\uC6D0\uC774 \uB418\uACA0\uC2B5\uB2C8\uB2E4.\n\n\n[1-2] \uC785\uD589 \uD6C4 \uC5B4\uB5A4 \uBD84\uC57C\uC5D0\uC11C \uC5B4\uB5A4 \uC804\uBB38\uAC00\uB85C \uC131\uC7A5\uD558\uACE0 \uC2F6\uC740\uAC00?\n\n\uC800\uB294 \uD6C4\uAE30 \uB2E8\uACC4 \uAE30\uC5C5\uC758 \uC2A4\uCF00\uC77C\uC5C5\uC744 \uB4B7\uBC1B\uCE68\uD558\uB294 \uC804\uBB38\uAC00\uB85C \uC131\uC7A5\uD558\uACE0 \uC2F6\uC2B5\uB2C8\uB2E4.\n\n\uC6B0\uC218\uD55C \uAE30\uC5C5\uC870\uCC28 \uC131\uC7A5\uC758 \uB9C8\uC9C0\uB9C9 \uD55C \uAC78\uC74C\uC744 \uC55E\uB450\uACE0 \uD070 \uBCBD\uC5D0 \uBD80\uB52A\uD799\uB2C8\uB2E4. \uCD08\uAE30\uC640 \uB2EC\uB9AC, \uBCF8\uACA9\uC801\uC778 \uD655\uC7A5\uC744 \uC55E\uB454 \uAE30\uC5C5\uC740 \uB354 \uD070 \uC790\uAE08\uACFC \uD6C4\uC18D \uD22C\uC790\uAC00 \uB3D9\uC2DC\uC5D0 \uD544\uC694\uD574\uC9D1\uB2C8\uB2E4. \uADF8\uB7EC\uB098 \uD22C\uC790 \uADDC\uBAA8\uAC00 \uCEE4\uC9C8\uC218\uB85D \uCC38\uC5EC\uD560 \uC790\uAE08 \uC8FC\uCCB4\uAC00 \uC904\uC5B4, \uD55C \uBC88 \uD750\uB984\uC774 \uB04A\uAE30\uBA74 \uC131\uC7A5\uC138\uB3C4 \uB454\uD654\uB429\uB2C8\uB2E4. \uC774 \uACF5\uBC31\uC744 \uBA54\uC6B0\uB294 \uC77C\uC740 \uC0B0\uC5C5\uC740\uD589\uC5D0\uC11C\uB9CC \uD560 \uC218 \uC788\uACE0, \uADF8\uB9CC\uD07C \uB354 \uD070 \uBC30\uC6C0\uC744 \uC5BB\uC744 \uC218 \uC788\uB2E4\uACE0 \uC0DD\uAC01\uD569\uB2C8\uB2E4.\n\n\uC785\uD589 \uD6C4, \uAE30\uC5C5\uC744 \uD68D\uC77C\uC801\uC73C\uB85C \uC2EC\uC0AC\uD558\uC9C0 \uC54A\uACE0 \uD604\uC7AC \uB193\uC778 \uC131\uC7A5 \uAD6D\uBA74\uBD80\uD130 \uC77D\uC5B4\uB0B4\uACA0\uC2B5\uB2C8\uB2E4. \uAE30\uC5C5\uB9C8\uB2E4 \uB9C9\uD788\uB294 \uC9C0\uC810\uC774 \uB2E4\uB974\uBBC0\uB85C, \uC774\uB97C \uC815\uD655\uD788 \uAD6C\uBD84\uD574 \uC54C\uB9DE\uC740 \uC9C0\uC6D0\uBC29\uC2DD\uC744 \uC81C\uC548\uD558\uACA0\uC2B5\uB2C8\uB2E4. \uD2B9\uD788 \uD6C4\uAE30 \uB2E8\uACC4\uC5D0\uC11C\uB294 \uD604\uC7AC \uD544\uC694\uD55C \uC790\uAE08\uB9CC\uC774 \uC544\uB2C8\uB77C, \uB2E4\uC74C \uB77C\uC6B4\uB4DC\uB85C \uC774\uC5B4\uC9C8 \uAC00\uB2A5\uC131\uAE4C\uC9C0 \uD568\uAED8 \uC810\uAC80\uD558\uACA0\uC2B5\uB2C8\uB2E4.`, followups:[] },
+
+    { id:'ex2', type:'\uC790\uC18C\uC11C', title:'\uBB38\uD56D2. \uD544\uC694 \uC5ED\uB7C9 & \uAC1C\uBC1C \uACBD\uD5D8 & \uBD80\uC871 \uC5ED\uB7C9', period:'', summary:'\uAE30\uC5C5 \uBD84\uC11D\uB825 / \uC0B0\uC5C5 \uC774\uD574\uB3C4 / \uAE00\uB85C\uBC8C \uBCF4\uC644', body:`[2-1] \uC0B0\uC5C5\uC740\uD589 \uC9C1\uC6D0\uC73C\uB85C \uAC00\uC7A5 \uD544\uC694\uD55C \uC5ED\uB7C9\uC740?\n\n'\uAE30\uC5C5 \uBD84\uC11D\uB825'\uACFC '\uC0B0\uC5C5 \uC774\uD574\uB3C4'\n\n\n[2-2] \uADF8 \uC5ED\uB7C9\uC744 \uD0A4\uC6B0\uAE30 \uC704\uD574 \uD55C \uACBD\uD5D8\uC740?\n\n\uCCAB\uC9F8\uB85C, \uAE30\uC5C5\uC744 \uB2E4\uAC01\uB3C4\uB85C \uBCF4\uB294 \uBD84\uC11D\uB825\uC785\uB2C8\uB2E4. \uBCF4\uC99D\uAE30\uAD00\uC5D0\uC11C 3\uAC1C\uC6D4\uAC04 \uADFC\uBB34\uD558\uBA70, \uCC98\uC74C\uC5D0\uB294 \uC7AC\uBB34\uC81C\uD45C\uC640 \uC2E0\uC6A9\uC815\uBCF4\uB9CC \uBCF4\uBA74 \uCDA9\uBD84\uD558\uB2E4\uACE0 \uC0DD\uAC01\uD588\uC2B5\uB2C8\uB2E4. \uADF8\uB7EC\uB098 \uC5F0\uC7A5 \uC2EC\uC0AC\uB97C \uBC18\uBCF5\uD558\uBA70 \uC22B\uC790\uB9CC\uC73C\uB85C\uB294 \uAE30\uC5C5\uC744 \uC124\uBA85\uD560 \uC218 \uC5C6\uB2E4\uB294 \uC810\uC744 \uBC30\uC6E0\uC2B5\uB2C8\uB2E4. \uB9E4\uCD9C\uC774 0\uC6D0\uC778 \uAE30\uC5C5\uB3C4 \uACE7\uBC14\uB85C \uBD80\uC2E4\uB85C \uB2E8\uC815\uD560 \uAC83\uC774 \uC544\uB2C8\uB77C \uD68C\uACC4 \uAE30\uC900\uACFC \uC0AC\uC5C5 \uD2B9\uC131\uC744 \uD568\uAED8 \uBD10\uC57C \uD588\uACE0, \uBC95\uC778\uB4F1\uAE30\uC640 \uC8FC\uC8FC\uBA85\uBD80\uB97C \uB300\uC870\uD558\uBA70 \uB300\uD45C\uC774\uC0AC\uC640 \uC2E4\uC81C \uACBD\uC601\uC790\uAC00 \uB2E4\uB97C \uC218 \uC788\uB2E4\uB294 \uC810\uB3C4 \uD655\uC778\uD588\uC2B5\uB2C8\uB2E4. \uC774\uD6C4\uC5D0\uB294 \uC790\uB8CC\uB97C \uC218\uB3D9\uC801\uC73C\uB85C \uBC1B\uC544\uB4E4\uC774\uC9C0 \uC54A\uACE0, \uC774\uC0C1\uC774 \uBCF4\uC774\uBA74 \uB300\uD45C\uB2D8\uACFC \uC9C1\uC811 \uD1B5\uD654\uD558\uAC70\uB098 \uCCB4\uB0A9 \uC5EC\uBD80\uAE4C\uC9C0 \uD655\uC778\uD558\uBA70 \uB05D\uAE4C\uC9C0 \uC810\uAC80\uD588\uC2B5\uB2C8\uB2E4. \uC774 \uACBD\uD5D8\uC744 \uD1B5\uD574 \uAE30\uC5C5\uC744 \uC5EC\uB7EC \uAC01\uB3C4\uC5D0\uC11C \uC0C1\uD669\uC5D0 \uB9DE\uAC8C \uD574\uC11D\uD558\uB294 \uC5ED\uB7C9\uC744 \uD0A4\uC6B8 \uC218 \uC788\uC5C8\uC2B5\uB2C8\uB2E4.\n\n\uB458\uC9F8\uB85C, \uC0B0\uC5C5 \uC804\uBC18\uC5D0 \uB300\uD55C \uC774\uD574\uB3C4\uC785\uB2C8\uB2E4. \uB2F9\uD589 \uC778\uD134\uC73C\uB85C 3\uAC1C\uC6D4\uAC04 \uADFC\uBB34\uD558\uBA70 \uB125\uC2A4\uD2B8\uB77C\uC6B4\uB4DC\uC5D0 \uCC38\uC5EC\uD574 30\uC5EC \uAC1C \uC2A4\uD0C0\uD2B8\uC5C5\uC758 \uD53C\uCE6D\uC744 \uB4E4\uC5C8\uC2B5\uB2C8\uB2E4. \uC774\uB54C \uAE30\uC5C5\uC758 \uC131\uC7A5 \uAC00\uB2A5\uC131\uC744 \uBA3C\uC800 \uD310\uB2E8\uD558\uACE0, \uC2EC\uC0AC\uC5ED\uB2D8\uC758 \uC9C8\uC758\uC751\uB2F5\uACFC \uBE44\uAD50\uD574\uBCF4\uBA70 \uC0B0\uC5C5\uB9C8\uB2E4 \uC911\uC694\uD558\uAC8C \uBD10\uC57C \uD560 \uAE30\uC900\uC774 \uB2E4\uB974\uB2E4\uB294 \uC810\uC744 \uBC30\uC6E0\uC2B5\uB2C8\uB2E4. \uADF8 \uB4A4\uB85C\uB294 \uAC1C\uBCC4 \uAE30\uC5C5\uC744 \uB118\uC5B4 \uC0B0\uC5C5 \uC804\uCCB4\uB97C \uD568\uAED8 \uBCF4\uB824 \uD588\uC2B5\uB2C8\uB2E4. \uBC18\uB3C4\uCCB4 \uACF5\uC815\uACFC M&A \uAD00\uB828 \uC5F0\uC218\uC5D0 \uCC38\uAC00\uD574 \uC2DC\uC7A5\uC758 \uC8FC\uC694 \uD2B8\uB80C\uB4DC\uB97C \uD30C\uC545\uD588\uACE0, LP\uBCC4 \uCD9C\uC790\uC0AC\uC5C5 \uC815\uB9AC\uC640 \uAE30\uC0AC \uC2A4\uD06C\uB7A9\uC744 \uD1B5\uD574 \uD604\uC7AC \uC5B4\uB5A4 \uC0B0\uC5C5\uC774 \uC8FC\uBAA9\uBC1B\uB294\uC9C0, \uC815\uCC45 \uCD08\uC810\uC774 \uD5A5\uD6C4 \uC5B4\uB514\uC5D0 \uB9DE\uCDB0\uC838\uC57C \uD558\uB294\uC9C0 \uC0B4\uD3C8\uC2B5\uB2C8\uB2E4.\n\n\n[2-3] \uBD80\uC871\uD55C \uC5ED\uB7C9\uACFC \uBCF4\uC644 \uACC4\uD68D\uC740?\n\n\uC81C\uAC00 \uBD80\uC871\uD558\uB2E4\uACE0 \uC0DD\uAC01\uD558\uB294 \uC5ED\uB7C9\uC740 \uAE00\uB85C\uBC8C \uC5ED\uB7C9\uC785\uB2C8\uB2E4.\n\n\uC785\uD589 \uD6C4 \uBC18\uB144 \uC548\uC5D0 OPIc AL \uB4F1\uAE09\uC744 \uCDE8\uB4DD\uD558\uB294 \uAC83\uC744 \uCCAB \uBC88\uC9F8 \uBAA9\uD45C\uB85C \uC0BC\uACA0\uC2B5\uB2C8\uB2E4. \uC2E0\uC785 \uD589\uC6D0\uC73C\uB85C\uC11C \uBC14\uC05C \uB098\uB0A0\uC744 \uBCF4\uB0B4\uACA0\uC9C0\uB9CC, \uD1F4\uADFC \uD6C4\uC5D0\uB3C4 \uAFB8\uC900\uD788 \uC2DC\uAC04\uC744 \uD22C\uC790\uD558\uC5EC \uBE44\uC988\uB2C8\uC2A4 \uD68C\uD654\uC758 \uAE30\uBCF8\uAE30\uB97C \uBC18\uB4DC\uC2DC \uAC16\uCD94\uACA0\uC2B5\uB2C8\uB2E4. \uB098\uC544\uAC00 \uC77C\uBCF8\uC5B4 \uD559\uC6D0\uC744 \uB2E4\uB2C8\uBA70 JLPT N1 \uCDE8\uB4DD\uC744 \uC7A5\uAE30 \uBAA9\uD45C\uB85C \uC0BC\uC544, \uC81C2\uC678\uAD6D\uC5B4\uAE4C\uC9C0 \uAC16\uCD98 \uC778\uC7AC\uB85C \uC131\uC7A5\uD574 \uB098\uAC00\uACA0\uC2B5\uB2C8\uB2E4.\n\n\uC774\uC678\uC5D0\uB3C4 \uC778\uD134 \uB2F9\uC2DC \uD574\uC678\uCC44 \uBC1C\uD589 OJT\uB098 \uC120\uBC15\uAE08\uC735 \uC5F0\uC218 \uB4F1\uC5D0 \uC9C1\uC811 \uC2E0\uCCAD\uD558\uC5EC \uCC38\uC5EC\uD55C \uB9CC\uD07C, \uC785\uD589 \uD6C4\uC5D0\uB3C4 \uAE30\uD68C\uB97C \uB193\uCE58\uC9C0 \uC54A\uACE0 \uAE00\uB85C\uBC8C \uC5C5\uBB34 \uC5ED\uB7C9\uC744 \uB113\uD600\uAC00\uACA0\uC2B5\uB2C8\uB2E4.`, followups:[] },
+
+    { id:'ex3', type:'\uC790\uC18C\uC11C', title:'\uBB38\uD56D3. \uC911\uC694 \uAC00\uCE58 & \uC801\uC6A9', period:'', summary:'\uC9C1\uC5C5\uC801 \uC0AC\uBA85\uAC10 / \uC758\uBBF8 \uCC3E\uAE30', body:`[3-1] \uBCF8\uC778\uC774 \uC911\uC694\uD558\uAC8C \uC0DD\uAC01\uD558\uB294 \uAC00\uCE58\uB294?\n\n'\uB0B4\uAC00 \uD558\uB294 \uC77C\uC758 \uAC00\uCE58\uB97C \uC544\uB294 \uC0AC\uBA85\uAC10'\n\n\n[3-2] \uADF8 \uAC00\uCE58\uB97C \uC911\uC694\uD558\uAC8C \uC0DD\uAC01\uD558\uB294 \uC774\uC720\uC640 \uC77C\uC0C1 \uC801\uC6A9\uC740?\n\n\uC800\uB294 \uC9C1\uC5C5\uC801 \uC0AC\uBA85\uAC10\uC774 \uC9C1\uC7A5\uC778\uC73C\uB85C\uC11C\uC758 \uC5ED\uB7C9 \uAC1C\uBC1C\uACFC \uC131\uACFC \uB2EC\uC131\uC5D0 \uC788\uC5B4 \uAC00\uC7A5 \uC911\uC694\uD55C \uAC00\uCE58\uB77C\uACE0 \uC0DD\uAC01\uD569\uB2C8\uB2E4. \uB0B4\uAC00 \uD558\uB294 \uC77C\uC774 \uC5B4\uB5A4 \uC758\uBBF8\uB97C \uC9C0\uB2C8\uB294\uC9C0 \uC54E\uC73C\uB85C\uC368 \uC5C5\uBB34\uC758 \uBCF4\uB78C\uC744 \uB290\uB07C\uACE0, \uC5C5\uBB34 \uC5ED\uB7C9 \uACC4\uBC1C\uC758 \uAC15\uB825\uD55C \uB3D9\uAE30\uAC00 \uB418\uAE30 \uB54C\uBB38\uC785\uB2C8\uB2E4.\n\n\uBD80\uB3D9\uC0B0 \uAE30\uAD00 \uC778\uD134 \uB2F9\uC2DC, \uB2E8\uC21C \uC2A4\uCE94\uACFC \uC11C\uB958 \uCD9C\uB825 \uC5C5\uBB34\uB97C \uBC18\uBCF5\uD558\uBA70 \uD765\uBBF8\uB97C \uB290\uB07C\uC9C0 \uBABB\uD588\uB358 \uC801\uC774 \uC788\uC2B5\uB2C8\uB2E4. \uD558\uC9C0\uB9CC \uC81C\uAC00 \uC815\uB9AC\uD55C \uC790\uB8CC\uAC00 \uD1A0\uC9C0 \uBCF4\uC0C1\uC561 \uC0B0\uC815\uACFC \uACF5\uC2DC \uC5C5\uBB34\uC758 \uAE30\uCD08 \uC790\uB8CC\uB85C \uD65C\uC6A9\uB41C\uB2E4\uB294 \uC810\uC744 \uC54C\uAC8C \uB41C \uD6C4 \uC5C5\uBB34 \uD6A8\uB2A5\uAC10\uC744 \uB290\uAF08\uC2B5\uB2C8\uB2E4. \uC544\uBB34\uB9AC \uB2E8\uC21C\uD574 \uBCF4\uC774\uB294 \uC5C5\uBB34\uB77C\uB3C4 \uACF5\uC801 \uAC00\uCE58\uC5D0 \uAE30\uC5EC\uD558\uACE0 \uC788\uC5C8\uB358 \uAC83\uC785\uB2C8\uB2E4.\n\n\uC911\uC18C\uAE30\uC5C5 \uBCF4\uC99D\uC11C \uC5F0\uC7A5 \uC5C5\uBB34\uB97C \uB9E1\uC558\uC744 \uB54C\uB3C4 \uC77C\uC774 \uB9CE\uC544 \uC9C0\uCE60 \uB54C\uAC00 \uC788\uC5C8\uC9C0\uB9CC, \uD55C \uAC74 \uD55C \uAC74\uC774 \uAE30\uC5C5\uC758 \uC0C8\uB85C\uC6B4 \uB3C4\uC804\uC744 \uC9C0\uC6D0\uD55C\uB2E4\uB294 \uC758\uBBF8\uB97C \uB5A0\uC62C\uB9AC\uBA70 \uB2E4\uC2DC \uD798\uC744 \uB0BC \uC218 \uC788\uC5C8\uC2B5\uB2C8\uB2E4. \uC774\uCC98\uB7FC \uC800\uB294 \uB2E8\uC21C\uD55C \uC77C\uC5D0\uC11C\uB3C4 \uC758\uBBF8\uB97C \uCC3E\uACE0 \uC2A4\uC2A4\uB85C \uB3D9\uAE30\uB97C \uBD80\uC5EC\uD558\uBA70, \uB9E1\uC740 \uBC14\uC5D0 \uCD5C\uC120\uC744 \uB2E4\uD558\uACE0\uC790 \uB178\uB825\uD558\uACE0 \uC788\uC2B5\uB2C8\uB2E4.\n\n\uD55C\uAD6D\uC0B0\uC5C5\uC740\uD589\uC740 \uACBD\uC81C \uC804\uBC18\uC5D0 \uD070 \uC601\uD5A5\uB825\uC744 \uB07C\uCE58\uB294 \uAE30\uAD00\uC785\uB2C8\uB2E4. \uC81C\uAC00 \uD558\uB294 \uC77C\uC774 \uB9E4\uC6B0 \uAC00\uCE58 \uC788\uC74C\uC744 \uBBFF\uACE0, \uC81C \uC5C5\uBB34\uB97C \uC9C4\uC2EC\uC73C\uB85C \uC790\uB791\uC2A4\uB7EC\uC6CC\uD558\uB294 \uC9C1\uC7A5\uC778\uC73C\uB85C\uC11C \uC0AC\uBA85\uAC10\uC744 \uAC00\uC9C0\uACE0 \uADFC\uBB34\uD560 \uAC83\uC785\uB2C8\uB2E4.`, followups:[] },
+
+    { id:'ex4', type:'\uC790\uC18C\uC11C', title:'\uBB38\uD56D4. \uBCC0\uD654 \uC2DC\uB3C4 \uACBD\uD5D8', period:'', summary:'PC Off\uC81C / \uD504\uB85C\uC138\uC2A4 \uAC1C\uC120 / 100\uC5EC \uAC74 \uC5F0\uC7A5', body:`[4-1] \uD504\uB808\uC784\uC744 \uD0C8\uD53C\uD574 \uC0C8\uB85C\uC6B4 \uBCC0\uD654\uB97C \uC2DC\uB3C4\uD55C \uACBD\uD5D8\uC740?\n\n'\uD1F4\uADFC \uC804 \uBC18\uBCF5\uB418\uB358 \uC2E4\uC218\uB97C \uD504\uB85C\uC138\uC2A4 \uBCC0\uD654\uB85C \uADF9\uBCF5\uD55C \uACBD\uD5D8'\n\n\n[4-2] \uBCC0\uD654\uAC00 \uD544\uC694\uD588\uB358 \uC774\uC720\uC640 \uBCF8\uC778\uC758 \uC5ED\uD560\u00B7\uD589\uB3D9\uC740?\n\n\uBCF4\uC99D\uAE30\uAD00 \uADFC\uBB34 \uB2F9\uC2DC, 'PC Off\uC81C'\uB85C \uC778\uD574 \uD1F4\uADFC \uC9C1\uC804\uC5D0 \uC5C5\uBB34\uC6A9 PC\uAC00 \uC790\uB3D9 \uC885\uB8CC\uB418\uC5C8\uC2B5\uB2C8\uB2E4. \uC774\uB85C \uC778\uD574 \uC5C5\uBB34 \uB9C8\uAC10 \uC9C1\uC804\uC5D0 \uBCF4\uC99D\uB8CC \uB0A9\uBD80 \uC5C5\uBB34\uAC00 \uBAB0\uB9AC\uBA74\uC11C \uAE09\uD558\uAC8C \uCC98\uB9AC\uD574\uC57C \uD558\uB294 \uC0C1\uD669\uC774 \uBC18\uBCF5\uB418\uC5C8\uC2B5\uB2C8\uB2E4. \uD2B9\uD788 \uB2F9\uC77C \uACB0\uC7AC\uAC00 \uD544\uC218\uC600\uAE30\uC5D0 \uCD08\uC870\uD568\uC73C\uB85C \uC2E4\uC218\uB97C \uD558\uAE30\uB3C4 \uD588\uC2B5\uB2C8\uB2E4.\n\n\uC774\uB97C \uD574\uACB0\uD558\uAE30 \uC704\uD574 \uCCAB\uC9F8\uB85C, \uC624\uD6C4 3\uC2DC\uBD80\uD130 \uBCF4\uB958 \uC911\uC778 \uBCF4\uC99D\uB8CC \uB0A9\uBD80 \uC11C\uB958 3\uC885\uC744 \uBBF8\uB9AC \uC900\uBE44\uD588\uC2B5\uB2C8\uB2E4. \uB458\uC9F8\uB85C, \uACB0\uC7AC \uC694\uCCAD\uCC3D\uC744 \uD654\uBA74\uC5D0 \uBBF8\uB9AC \uB744\uC6CC\uB193\uC544 \uC989\uC2DC \uC785\uB825\uD560 \uC218 \uC788\uB3C4\uB85D \uB300\uBE44\uD558\uB294 \uD55C\uD3B8, \uB300\uD45C\uB2D8\uB4E4\uAED8 \uC870\uAE30 \uB0A9\uBD80 \uBC29\uBC95\uC744 \uBB38\uC790\uB85C \uC548\uB0B4\uD558\uC5EC \uB9C8\uAC10 \uC2DC\uAC04\uB300\uC5D0 \uBAB0\uB9AC\uB294 \uAC74\uC218\uB97C \uC904\uC600\uC2B5\uB2C8\uB2E4.\n\n\uADF8 \uACB0\uACFC 100\uC5EC \uAC1C \uC5C5\uCCB4\uC758 \uBCF4\uC99D\uC11C\uB97C \uCC28\uC9C8\uC5C6\uC774 \uC5F0\uC7A5\uD560 \uC218 \uC788\uC5C8\uC2B5\uB2C8\uB2E4.\n\n\n[4-3] \uADF8 \uACBD\uD5D8\uC5D0\uC11C \uC5BB\uC740 \uAD50\uD6C8\uC740?\n\n\uC81C\uAC00 \uC5BB\uC740 \uAD50\uD6C8\uC740 \uACBD\uD5D8\uC744 \uD1B5\uD55C \uD559\uC2B5\uACFC \uC131\uC7A5\uC774 \uBB34\uC5C7\uBCF4\uB2E4 \uC911\uC694\uD558\uB2E4\uB294 \uAC83\uC785\uB2C8\uB2E4. \uC2E4\uC81C\uB85C \uC120\uBC30\uB2D8\uB4E4\uAED8\uC11C\uB3C4 \uBC18\uBCF5\uB418\uB294 \uBB38\uC81C\uB9C8\uB2E4 \uBCF8\uC778\uB9CC\uC758 \uB178\uD558\uC6B0\uB85C \uD6A8\uC728\uC801\uC73C\uB85C \uB300\uCC98\uD558\uACE0 \uACC4\uC168\uC2B5\uB2C8\uB2E4.\n\n\uC2E0\uC785\uD589\uC6D0\uC73C\uB85C\uC11C \uB9C8\uC8FC\uD560 \uC5EC\uB7EC \uC5B4\uB824\uC6C0 \uB610\uD55C \uC120\uBC30\uB2D8\uB4E4\uC758 \uC9C0\uB3C4\uC640 \uC18C\uC911\uD55C \uACBD\uD5D8\uC744 \uC591\uBD84 \uC0BC\uC544 \uCDA9\uBD84\uD788 \uAC1C\uC120\uD574 \uB098\uAC08 \uC218 \uC788\uB2E4\uACE0 \uBBFF\uC2B5\uB2C8\uB2E4. \uB298 \uBC30\uC6B0\uACE0\uC790 \uD558\uB294 \uC790\uC138\uB85C \uC131\uC2E4\uD788 \uC784\uD558\uBA70, \uC800\uB9CC\uC758 \uC804\uBB38\uC801\uC778 \uD398\uC774\uC2A4\uB97C \uCC3E\uC544\uAC00\uACA0\uC2B5\uB2C8\uB2E4.`, followups:[] },
+
+    { id:'ex5', type:'\uC790\uC18C\uC11C', title:'\uBB38\uD56D5. \uAC00\uC7A5 \uC5F4\uC815\uC744 \uC3DF\uC740 \uD65C\uB3D9', period:'', summary:'\uC11C\uBE0C\uC6E8\uC774 / \uB9E4\uB2C8\uC800 \uBC1C\uD0C1 / \uB4F1\uB85D\uAE08 \uB9C8\uB828', body:`[5-1] \uAC00\uC7A5 \uC5F4\uC815\uC744 \uC3DF\uC558\uB358 \uD65C\uB3D9\uC740?\n\n'\uB4F1\uB85D\uAE08\uC744 \uC704\uD574 \uC2DC\uC791\uD574, \uB9E4\uB2C8\uC800\uB85C \uC778\uC815\uBC1B\uC740 \uCCAB \uC544\uB974\uBC14\uC774\uD2B8'\n\n\n[5-2] \uADF8 \uD65C\uB3D9\uC758 \uAD6C\uCCB4\uC801 \uB0B4\uC6A9\uACFC \uC131\uACFC\uB294?\n\n\uD559\uAE30 \uB4F1\uB85D\uAE08\uC744 \uC2A4\uC2A4\uB85C \uB9C8\uB828\uD558\uACA0\uB2E4\uB294 \uBAA9\uD45C\uB85C \uC0CC\uB4DC\uC704\uCE58 \uB9E4\uC7A5\uC5D0\uC11C \uC8FC 5\uC77C \uADFC\uBB34\uB97C \uC2DC\uC791\uD588\uC2B5\uB2C8\uB2E4. \uCC98\uC74C \uC811\uD558\uB294 \uBE0C\uB79C\uB4DC\uC778 \uB370\uB2E4 \uC810\uC2EC\uB9C8\uB2E4 \uBB38 \uBC16\uAE4C\uC9C0 \uC904\uC774 \uC11C\uB294 \uACF3\uC774\uB77C \uC801\uC751\uC774 \uD798\uB4E4\uC5C8\uC2B5\uB2C8\uB2E4. \uD558\uC9C0\uB9CC \uD560 \uC218 \uC788\uB294 \uC77C\uBD80\uD130 \uD558\uB098\uC529 \uB354 \uB9E1\uACE0\uC790 \uD588\uC2B5\uB2C8\uB2E4. \uC8FC\uBB38, \uBE75 \uC370\uAE30, \uC124\uAC70\uC9C0\uAE4C\uC9C0 \uAC00\uB2A5\uD55C \uC5C5\uBB34\uB97C \uBAA8\uB450 \uB9E1\uC544 \uCC98\uB9AC\uD588\uACE0, \uD53C\uD06C\uC2DC\uAC04\uC5D0\uB294 \uAC00\uC7A5 \uBC14\uC05C \uC704\uCE58\uC5D0 \uC790\uC9C4\uD574 \uB4E4\uC5B4\uAC14\uC2B5\uB2C8\uB2E4. \uADFC\uBB34 \uC678 \uC2DC\uAC04\uC5D0\uB3C4 \uBA54\uB274\uC640 \uC791\uC5C5 \uC21C\uC11C\uB97C \uBC18\uBCF5 \uC5F0\uC2B5\uD558\uBA70 \uC219\uB828\uB3C4\uB97C \uB192\uC600\uACE0, \uADF8 \uACB0\uACFC \uC0AC\uC7A5\uB2D8\uC758 \uC2E0\uB8B0\uB97C \uC5BB\uC5B4 \uB9E4\uB2C8\uC800\uB85C \uBC1C\uD0C1\uB418\uC5C8\uC2B5\uB2C8\uB2E4. \uC774\uD6C4 1\uB144\uAC04 \uADFC\uBB34\uB97C \uC774\uC5B4\uAC00\uBA70 \uB4F1\uB85D\uAE08\uC744 \uC804\uC561 \uB9C8\uB828\uD560 \uC218 \uC788\uC5C8\uC2B5\uB2C8\uB2E4.\n\n\n[5-3] \uADF8 \uD65C\uB3D9\uC774 \uBCF8\uC778\uC758 \uC0B6\uC5D0 \uC900 \uC601\uD5A5\uC740?\n\n\uC774 \uACBD\uD5D8\uC744 \uD1B5\uD574, \uC800\uB294 \uACB0\uACFC\uB97C \uB9CC\uB4E4\uAE30 \uC704\uD574 \uD544\uC694\uD55C \uAC83\uC740 \uC7AC\uB2A5\uBCF4\uB2E4 \uD0DC\uB3C4\uB77C\uB294 \uAC83\uC744 \uAE68\uB2EC\uC558\uC2B5\uB2C8\uB2E4. \uAC15\uC758\uAC00 \uB05D\uB098\uBA74 \uACE7\uC7A5 \uB9E4\uC7A5\uC73C\uB85C \uCD9C\uADFC\uD588\uACE0 \uC7A0\uC774 \uBD80\uC871\uD55C \uB0A0\uC774 \uB298\uBA70 \uC26C\uC6B4 \uC77C\uC744 \uCC3E\uC544\uBCFC\uAE4C \uD558\uB294 \uC0DD\uAC01\uC774 \uB4E4\uAE30\uB3C4 \uD588\uC9C0\uB9CC, \uB9E1\uC740 \uC77C\uC744 \uB05D\uAE4C\uC9C0 \uD574\uB0B4\uB294 \uACFC\uC815\uC5D0\uC11C \uC2A4\uC2A4\uB85C\uC5D0 \uB300\uD55C \uAE30\uC900\uC774 \uB192\uC544\uC84C\uC2B5\uB2C8\uB2E4. \uC774\uD6C4 \uC5B4\uB5A4 \uC77C\uC774\uB4E0 \uC8FC\uC5B4\uC9C4 \uB9CC\uD07C\uB9CC \uD558\uB294 \uAC83\uC774 \uC544\uB2C8\uB77C \uC2A4\uC2A4\uB85C \uAE30\uC900\uC744 \uB04C\uC5B4\uC62C\uB9AC\uB294 \uC2B5\uAD00\uC774 \uC790\uB9AC\uC7A1\uAC8C \uB418\uC5C8\uC2B5\uB2C8\uB2E4. \uC774\uB7EC\uD55C \uD0DC\uB3C4\uB97C \uBC14\uD0D5\uC73C\uB85C \uC785\uD589 \uC774\uD6C4\uC5D0\uB3C4 \uAFB8\uC900\uD788 \uC131\uACFC\uB97C \uB9CC\uB4E4\uC5B4\uB0B4\uACA0\uC2B5\uB2C8\uB2E4.`, followups:[] },
+
+    { id:'ex6', type:'\uC778\uD134', title:'\uD55C\uAD6D\uC0B0\uC5C5\uC740\uD589 \uC815\uCC45\uD380\uB4DC\uAE08\uC735\uC2E4', period:'2025.05.26 ~ 2025.08.29', summary:'\uC6B4\uC6A9\uC0AC \uC120\uC815 \uC9C0\uC6D0\u00B7\uC815\uCC45\uD380\uB4DC \uCD9C\uC790\uC0AC\uC5C5 \uBCF4\uC870 / \uB125\uC2A4\uD2B8\uB77C\uC6B4\uB4DC 30\uC5EC \uC0AC \uD53C\uCE6D', body:`\uB2F4\uB2F9\uC5C5\uBB34: \uC6B4\uC6A9\uC0AC \uC120\uC815 \uC9C0\uC6D0 \uBC0F \uAD00\uB828 \uC790\uB8CC \uC870\uC0AC \uB4F1 \uC815\uCC45\uD380\uB4DC \uCD9C\uC790\uC0AC\uC5C5 \uBCF4\uC870.\n\n\uB125\uC2A4\uD2B8\uB77C\uC6B4\uB4DC\uC5D0 \uCC38\uC5EC\uD574 30\uC5EC \uAC1C \uC2A4\uD0C0\uD2B8\uC5C5\uC758 \uD53C\uCE6D\uC744 \uB4E4\uC73C\uBA70 \uC0B0\uC5C5\uBCC4 \uD3C9\uAC00 \uAE30\uC900\uC758 \uCC28\uC774\uB97C \uD559\uC2B5. \uBC18\uB3C4\uCCB4 \uACF5\uC815\u00B7M&A \uC5F0\uC218\uC5D0 \uCC38\uAC00\uD574 \uC2DC\uC7A5 \uD2B8\uB80C\uB4DC\uB97C \uD30C\uC545. LP\uBCC4 \uCD9C\uC790\uC0AC\uC5C5 \uC815\uB9AC\uC640 \uAE30\uC0AC \uC2A4\uD06C\uB7A9\uC744 \uD1B5\uD574 \uC815\uCC45 \uCD08\uC810\uC744 \uC810\uAC80.`, followups:[] },
+
+    { id:'ex7', type:'\uC778\uD134', title:'\uC2E0\uC6A9\uBCF4\uC99D\uAE30\uAE08 \uC601\uC5C5\uC810', period:'2024.09.04 ~ 2024.11.29', summary:'\uC911\uAE30 \uBCF4\uC99D \uC5F0\uC7A5\u00B7\uAC31\uC2E0 / PC Off\uC81C \uD504\uB85C\uC138\uC2A4 \uAC1C\uC120', body:`\uB2F4\uB2F9\uC5C5\uBB34: \uC911\uC18C\uAE30\uC5C5 \uBCF4\uC99D \uC5F0\uC7A5\u00B7\uAC31\uC2E0 \uAD00\uB828 \uC870\uAC74\uBCC0\uACBD \uC5C5\uBB34 \uC218\uD589.\n\n\uC22B\uC790\uB9CC\uC73C\uB85C \uAE30\uC5C5\uC744 \uC124\uBA85\uD560 \uC218 \uC5C6\uB2E4\uB294 \uC810\uC744 \uBC30\uC6C0. \uB9E4\uCD9C 0\uC6D0 \uAE30\uC5C5\uB3C4 \uD68C\uACC4 \uAE30\uC900\uACFC \uC0AC\uC5C5 \uD2B9\uC131\uC744 \uD568\uAED8 \uBCF4\uACE0, \uBC95\uC778\uB4F1\uAE30\uC640 \uC8FC\uC8FC\uBA85\uBD80\uB97C \uB300\uC870\uD558\uBA70 \uC2E4\uC81C \uACBD\uC601\uC790\uB97C \uD655\uC778. \uC774\uC0C1\uC774 \uBCF4\uC774\uBA74 \uB300\uD45C\uC640 \uC9C1\uC811 \uD1B5\uD654\uD558\uAC70\uB098 \uCCB4\uB0A9 \uC5EC\uBD80\uAE4C\uC9C0 \uB05D\uAE4C\uC9C0 \uC810\uAC80.\n\nPC Off\uC81C\uB85C \uB9C8\uAC10 \uC9C1\uC804 \uBCF4\uC99D\uB8CC \uB0A9\uBD80\uAC00 \uBAB0\uB9AC\uB294 \uBB38\uC81C\uB97C, \uC624\uD6C4 3\uC2DC\uBD80\uD130 \uC11C\uB958 \uC0AC\uC804 \uC900\uBE44\u00B7\uACB0\uC7AC\uCC3D \uC0AC\uC804 \uB178\uCD9C\u00B7\uB300\uD45C\uB4E4\uAED8 \uC870\uAE30 \uB0A9\uBD80 \uBB38\uC790 \uC548\uB0B4\uB85C \uD574\uACB0\uD574 100\uC5EC \uAC1C \uC5C5\uCCB4 \uBCF4\uC99D\uC11C\uB97C \uCC28\uC9C8 \uC5C6\uC774 \uC5F0\uC7A5.`, followups:[] },
+
+    { id:'ex8', type:'\uD65C\uB3D9', title:'\uD76C\uB9DD\uC774\uC74C \uC11C\uD3EC\uD130\uC988', period:'2020.07.31 ~ 2021.02.17', summary:'\uC9C0\uC5ED \uC6B0\uC218\uAE30\uC5C5 \uD64D\uBCF4 / \uACBD\uC9C4\uB300\uD68C \uAE08\uC0C1', body:`\uC9C0\uC5ED \uC6B0\uC218\uAE30\uC5C5 \uD0D0\uBC29 \uD6C4\uAE30 \uD64D\uBCF4 \uCEE8\uD150\uCE20 \uBC0F \uAC1C\uC120 \uC544\uC774\uB514\uC5B4 \uC81C\uC548. \uC9C0\uC5ED \uC6B0\uC218 \uAE30\uC5C5 \uD64D\uBCF4 \uD65C\uB3D9\uC744 \uD1B5\uD574 \uAD6C\uC778 \uBBF8\uC2A4\uB9E4\uCE58 \uD574\uC18C.\n\n\uACBD\uC9C4\uB300\uD68C\uC5D0\uC11C \uD604\uD669 \uBD84\uC11D \uBC0F \uAC1C\uC120 \uBC29\uD5A5 \uC81C\uC548\uD558\uC5EC \uAE08\uC0C1 \uC218\uC0C1.`, followups:[] },
+
+    { id:'ex9', type:'\uD65C\uB3D9', title:'\uAE30\uBCF4 \uCCAD\uB144\uAE30\uC220\uD3C9\uAC00\uCCB4\uD5D8\uB2E8', period:'2022.07.25 ~ 2022.09.08', summary:'\uAE30\uC220\uBCF4\uC99D \uD604\uC7A5 \uD0D0\uBC29 / \uC2EC\uC0AC \uC808\uCC28 \uCCB4\uD5D8', body:`\uC911\uC18C\uAE30\uC5C5 \uAE30\uC220\uBCF4\uC99D \uD604\uC7A5 \uD0D0\uBC29 \uBC0F \uCCB4\uD5D8\uAE30 \uC791\uC131. \uAE30\uC220\uD3C9\uAC00 \uD604\uC7A5\uC5D0 \uB3D9\uD589\uD558\uC5EC \uB300\uD45C\uC790 \uBA74\uB2F4 \uBC0F \uAE30\uC220 \uAC80\uC99D \uACFC\uC815 \uCCB4\uD5D8. \uC2E0\uC0AC\uC5C5 \uBAA8\uB378 \uBC1C\uD45C \uCCAD\uCDE8 \uBC0F \uAE30\uC220\uBCF4\uC99D \uC2EC\uC0AC \uC808\uCC28 \uC804\uBC18\uC5D0 \uB300\uD55C \uC774\uD574.`, followups:[] },
+
+    { id:'ex10', type:'\uD65C\uB3D9', title:'\uC2E0\uD55C\uC740\uD589 \uD64D\uBCF4\uB300\uC0AC', period:'2022.08.09 ~ 2022.12.30', summary:'\uB9B4\uC2A4 \uC81C\uC791 / \uCC3D\uAD6C \uBCF4\uC870', body:`\uC628\u00B7\uC624\uD504\uB77C\uC778 \uD64D\uBCF4 \uD65C\uB3D9 \uBC0F \uCC3D\uAD6C \uC5C5\uBB34 \uBCF4\uC870. \uC2DC\uC911\uC740\uD589 \uC11C\uBE44\uC2A4 \uD64D\uBCF4 \uB9B4\uC2A4 \uC81C\uC791 \uBC0F \uC720\uBA85 \uAD00\uAD11\uC9C0\uC5D0\uC11C \uD64D\uBCF4 \uCEA0\uD398\uC778 \uC804\uAC1C. \uB0B4\uBC29 \uACE0\uAC1D \uC751\uB300 \uBC0F \uD559\uC0DD\uC99D \uBC1C\uAE09 \uC5C5\uBB34 \uC9C0\uC6D0 \uB4F1 \uCC3D\uAD6C \uC5C5\uBB34 \uBCF4\uC870.`, followups:[] },
+
+    { id:'ex11', type:'\uD65C\uB3D9', title:'\uAE08\uC735\uAC10\uB3C5\uC6D0 \uAE08\uC735\uAD50\uC721 \uBD09\uC0AC\uB2E8', period:'2022.08.23 ~ 2023.12.31', summary:'\uC2DC\uB2C8\uC5B4 \uB514\uC9C0\uD138 \uAE08\uC735\uAD50\uC721 \uBCF4\uC870 \uAC15\uC0AC', body:`\uC2DC\uB2C8\uC5B4 \uB514\uC9C0\uD138 \uAE08\uC735\uAD50\uC721 \uBCF4\uC870 \uAC15\uC0AC\uB85C \uD65C\uB3D9\uD558\uC5EC \uC218\uC5C5 \uBCF4\uC870. \uC740\uD589 \uC571 \uC124\uCE58 \uBC0F \uD68C\uC6D0 \uAC00\uC785, \uACC4\uC88C\uC870\uD68C, \uC774\uCCB4 \uBC29\uBC95 \uB4F1 \uAE30\uBCF8 \uAE30\uB2A5 \uC911\uC2EC \uC2E4\uC2B5. QR\uCF54\uB4DC \uACB0\uC81C, \uAC04\uD3B8\uACB0\uC81C \uC571 \uC124\uCE58 \uBC0F \uC0AC\uC6A9\uBC95 \uB4F1\uC744 \uC2E4\uC81C \uC2DC\uC5F0\uD558\uBA70 \uC124\uBA85.`, followups:[] },
+  ],
   questions: [
     { id:'q1',  cat:'c1', q:'성격적 장점은 무엇입니까?', kw:'사교성/회복력', answers:['먼저 다가갑니다.','회복력이 빠릅니다. [@서브웨이]'], tail:'' },
     { id:'q2',  cat:'c1', q:'차별화된 강점은 무엇인가요?', kw:'실행력/꾸준함', answers:['먼저 움직이는 실행력'], tail:'' },
@@ -777,53 +837,6 @@ window.MM_DATA = {
     { id:'q148',cat:'c13', q:'산업은행과 잘 어울린다고 생각하는 이유는?', kw:'실행력/적응/학습', answers:['먼저 움직이는 실행력 — 신속 정책금융 기조와 정합.','순환근무·다양한 업무에 적응하는 학습 자세.','한번 더 점검하는 신중함 — 정책금융 신뢰의 본질.'], tail:'' },
     { id:'q149',cat:'c5',  q:'좋은 조직문화에 필요한 3가지는?', kw:'신뢰/소통/자율', answers:[], tail:'' },
     { id:'q150',cat:'c5',  q:'인간관계에서 가장 중요한 것은?', kw:'신뢰', answers:[], tail:'' },
-
-    // ── c14 자소서·경험 ──
-    { id:'q200',cat:'c14', q:'[자소서 1-1] 산업은행에 지원한 동기는? (회사 선택 기준 포함)', kw:'성장기회/위기/정책금융/확장', answers:['성장 기회 많은 곳을 원함.','인턴 중 팀장 말씀 — 새로운 위기가 계속 생기는 한 할 일은 더 많아진다.','시중은행·타 기관 대신할 수 없는 정책금융 역할, 시대 맞춰 확장.','선배들 — 각 부서가 다른 역할이지만 기업 성장 한 목표.'], fullAnswer:`저는 성장할 기회가 많은 곳에서 일하고 싶습니다.\n\n학부 시절부터 기업에 자금을 연결하는 일에 관심이 있었고, 그 연장선에서 당행 인턴에 지원했습니다. 다만 당시에는 산업은행이 다른 금융기관과 어떻게 다른지까지는 깊이 생각해보지 못했습니다.\n\n인턴 근무 중 팀장님께 산업은행의 향후 전망을 여쭤본 적이 있습니다. "새로운 위기가 계속 생기는 한, 해야 할 일은 더욱 많아질 것"이라는 말씀이 오래 남았습니다. 산업은행은 시중은행이나 타 기관이 대신할 수 없는 정책금융의 역할을 맡아왔고, 그 역할은 시대에 맞춰 계속 확장되어 왔습니다. 머물러 있지 않는 조직이기에 전문성을 키울 기회도 함께 늘어난다는 것을 그때 깨달았습니다.\n\n선배님들과 함께 일하며 그 깨달음은 확신이 됐습니다. 한 스타트업의 성장을 위해 어떤 부서는 투자자와 기업을 연결하고, 또 다른 부서는 펀드를 조성해 자금을 공급했습니다. 각 부서의 역할은 달랐지만 모두가 기업 성장이라는 하나의 목표를 향해 움직이고 있었습니다. 구성원 모두가 각자의 역할에 자부심을 느끼며 커리어를 쌓아가는 모습은 큰 영감을 주었습니다.\n\n저 또한 변화에 맞춰 새로운 역할을 맡아가며, 전문성을 키우는 행원이 되겠습니다.`, tail:'' },
-
-    { id:'q201',cat:'c14', q:'[자소서 1-2] 입행 후 어떤 분야의 어떤 전문가로 성장하고 싶은가?', kw:'후기단계스케일업/공백메우기', answers:['후기 단계 기업의 스케일업 전문가.','확장 직전 큰 자금·후속투자 동시 필요, 자금 주체는 줄어 흐름 끊김.','산은이 메울 수 있는 공백.','성장 국면별 진단·다음 라운드 점검.'], fullAnswer:`저는 후기 단계 기업의 스케일업을 뒷받침하는 전문가로 성장하고 싶습니다.\n\n우수한 기업조차 성장의 마지막 한 걸음을 앞두고 큰 벽에 부딪힙니다. 초기와 달리, 본격적인 확장을 앞둔 기업은 더 큰 자금과 후속 투자가 동시에 필요해집니다. 그러나 투자 규모가 커질수록 참여할 자금 주체가 줄어, 한 번 흐름이 끊기면 성장세도 둔화됩니다. 이 공백을 메우는 일은 산업은행에서만 할 수 있고, 그만큼 더 큰 배움을 얻을 수 있다고 생각합니다.\n\n입행 후, 기업을 획일적으로 심사하지 않고 현재 놓인 성장 국면부터 읽어내겠습니다. 기업마다 막히는 지점이 다르므로, 이를 정확히 구분해 알맞은 지원방식을 제안하겠습니다. 특히 후기 단계에서는 현재 필요한 자금만이 아니라, 다음 라운드로 이어질 가능성까지 함께 점검하겠습니다.`, tail:'' },
-
-    { id:'q202',cat:'c14', q:'[자소서 2-1] 산업은행 직원으로 가장 필요한 역량은?', kw:'기업분석력/산업이해도', answers:['기업 분석력.','산업 이해도.'], fullAnswer:`'기업 분석력'과 '산업 이해도'`, tail:'' },
-
-    { id:'q203',cat:'c14', q:'[자소서 2-2] 그 역량을 키우기 위해 한 경험은?', kw:'보증기관3개월/넥스트라운드30사', answers:['보증기관 3개월 — 숫자만으로 기업 설명 불가, 매출 0원 사례·법인등기와 주주명부 대조.','대표 직접 통화·체납 확인으로 끝까지 점검.','산은 인턴 3개월 — 넥스트라운드 30여 개 피칭 청취.','반도체·M&A 연수, LP 출자사업 정리, 기사 스크랩으로 산업 트렌드 추적.'], fullAnswer:`첫째로, 기업을 다각도로 보는 분석력입니다. 보증기관에서 3개월간 근무하며, 처음에는 재무제표와 신용정보만 보면 충분하다고 생각했습니다. 그러나 연장 심사를 반복하며 숫자만으로는 기업을 설명할 수 없다는 점을 배웠습니다. 매출이 0원인 기업도 곧바로 부실로 단정할 것이 아니라 회계 기준과 사업 특성을 함께 봐야 했고, 법인등기와 주주명부를 대조하며 대표이사와 실제 경영자가 다를 수 있다는 점도 확인했습니다. 이후에는 자료를 수동적으로 받아들이지 않고, 이상이 보이면 대표님과 직접 통화하거나 체납 여부까지 확인하며 끝까지 점검했습니다. 이 경험을 통해 기업을 여러 각도에서 상황에 맞게 해석하는 역량을 키울 수 있었습니다.\n\n둘째로, 산업 전반에 대한 이해도입니다. 당행 인턴으로 3개월간 근무하며 넥스트라운드에 참여해 30여 개 스타트업의 피칭을 들었습니다. 이때 기업의 성장 가능성을 먼저 판단하고, 심사역님의 질의응답과 비교해보며 산업마다 중요하게 봐야 할 기준이 다르다는 점을 배웠습니다. 그 뒤로는 개별 기업을 넘어 산업 전체를 함께 보려 했습니다. 반도체 공정과 M&A 관련 연수에 참가해 시장의 주요 트렌드를 파악했고, LP별 출자사업 정리와 기사 스크랩을 통해 현재 어떤 산업이 주목받는지, 정책 초점이 향후 어디에 맞춰져야 하는지 살폈습니다.`, tail:'' },
-
-    { id:'q204',cat:'c14', q:'[자소서 2-3] 부족한 역량과 보완 계획은?', kw:'글로벌/OPIcAL/JLPTN1', answers:['글로벌 역량 부족.','반년 내 OPIc AL.','일본어 학원 — JLPT N1 장기.','해외채 OJT·선박금융 연수 등 기회 적극 신청.'], fullAnswer:`제가 부족하다고 생각하는 역량은 글로벌 역량입니다.\n\n입행 후 반년 안에 OPIc AL 등급을 취득하는 것을 첫 번째 목표로 삼겠습니다. 신입 행원으로서 바쁜 나날을 보내겠지만, 퇴근 후에도 꾸준히 시간을 투자하여 비즈니스 회화의 기본기를 반드시 갖추겠습니다. 나아가 일본어 학원을 다니며 JLPT N1 취득을 장기 목표로 삼아, 제2외국어까지 갖춘 인재로 성장해 나가겠습니다.\n\n이외에도 인턴 당시 해외채 발행 OJT나 선박금융 연수 등에 직접 신청하여 참여한 만큼, 입행 후에도 기회를 놓치지 않고 글로벌 업무 역량을 넓혀가겠습니다.`, tail:'' },
-
-    { id:'q205',cat:'c14', q:'[자소서 3-1] 본인이 중요하게 생각하는 가치는?', kw:'직업적사명감', answers:['내가 하는 일의 가치를 아는 사명감.'], fullAnswer:`'내가 하는 일의 가치를 아는 사명감'`, tail:'' },
-
-    { id:'q206',cat:'c14', q:'[자소서 3-2] 그 가치를 중요하게 생각하는 이유와 일상 적용은?', kw:'부동산인턴/보증서연장/공적가치', answers:['의미를 알면 보람과 동기 부여.','부동산 인턴 — 단순 스캔이 토지보상·공시 기초자료라는 점 인지 후 효능감.','중기 보증연장 — 한 건 한 건이 기업 새 도전이라는 의미로 재충전.','단순한 일에서도 의미 찾고 동기 부여하는 습관.'], fullAnswer:`저는 직업적 사명감이 직장인으로서의 역량 개발과 성과 달성에 있어 가장 중요한 가치라고 생각합니다. 내가 하는 일이 어떤 의미를 지니는지 앎으로써 업무의 보람을 느끼고, 업무 역량 계발의 강력한 동기가 되기 때문입니다.\n\n부동산 기관 인턴 당시, 단순 스캔과 서류 출력 업무를 반복하며 흥미를 느끼지 못했던 적이 있습니다. 하지만 제가 정리한 자료가 토지 보상액 산정과 공시 업무의 기초 자료로 활용된다는 점을 알게 된 후 업무 효능감을 느꼈습니다. 아무리 단순해 보이는 업무라도 공적 가치에 기여하고 있었던 것입니다.\n\n중소기업 보증서 연장 업무를 맡았을 때도 일이 많아 지칠 때가 있었지만, 한 건 한 건이 기업의 새로운 도전을 지원한다는 의미를 떠올리며 다시 힘을 낼 수 있었습니다. 이처럼 저는 단순한 일에서도 의미를 찾고 스스로 동기를 부여하며, 맡은 바에 최선을 다하고자 노력하고 있습니다.\n\n한국산업은행은 경제 전반에 큰 영향력을 끼치는 기관입니다. 제가 하는 일이 매우 가치 있음을 믿고, 제 업무를 진심으로 자랑스러워하는 직장인으로서 사명감을 가지고 근무할 것입니다.`, tail:'' },
-
-    { id:'q207',cat:'c14', q:'[자소서 4-1] 프레임을 탈피해 새로운 변화를 시도한 경험은?', kw:'PCOff제/프로세스개선', answers:['퇴근 전 반복 실수를 프로세스 변화로 극복.'], fullAnswer:`'퇴근 전 반복되던 실수를 프로세스 변화로 극복한 경험'`, tail:'' },
-
-    { id:'q208',cat:'c14', q:'[자소서 4-2] 변화가 필요했던 이유와 본인의 역할·행동은?', kw:'PC자동종료/사전준비/조기납부안내', answers:['PC Off제로 마감 직전 보증료 납부 몰림 — 초조함으로 실수.','오후 3시부터 보증료 서류 3종 사전 준비.','결재 요청창 미리 띄움 + 대표들께 조기 납부 문자 안내.','100여 개 업체 보증서 차질 없이 연장.'], fullAnswer:`보증기관 근무 당시, 'PC Off제'로 인해 퇴근 직전에 업무용 PC가 자동 종료되었습니다. 이로 인해 업무 마감 직전에 보증료 납부 업무가 몰리면서 급하게 처리해야 하는 상황이 반복되었습니다. 특히 당일 결재가 필수였기에 초조함으로 실수를 하기도 했습니다.\n\n이를 해결하기 위해 첫째로, 오후 3시부터 보류 중인 보증료 납부 서류 3종을 미리 준비했습니다. 둘째로, 결재 요청창을 화면에 미리 띄워놓아 즉시 입력할 수 있도록 대비하는 한편, 대표님들께 조기 납부 방법을 문자로 안내하여 마감 시간대에 몰리는 건수를 줄였습니다.\n\n그 결과 100여 개 업체의 보증서를 차질없이 연장할 수 있었습니다.`, tail:'' },
-
-    { id:'q209',cat:'c14', q:'[자소서 4-3] 그 경험에서 얻은 교훈은?', kw:'경험학습/선배노하우', answers:['경험을 통한 학습과 성장이 가장 중요.','선배들도 반복 문제마다 본인 노하우로 대처.','지도와 경험을 양분 삼아 개선 가능.'], fullAnswer:`제가 얻은 교훈은 경험을 통한 학습과 성장이 무엇보다 중요하다는 것입니다. 실제로 선배님들께서도 반복되는 문제마다 본인만의 노하우로 효율적으로 대처하고 계셨습니다.\n\n신입행원으로서 마주할 여러 어려움 또한 선배님들의 지도와 소중한 경험을 양분 삼아 충분히 개선해 나갈 수 있다고 믿습니다. 늘 배우고자 하는 자세로 성실히 임하며, 저만의 전문적인 페이스를 찾아가겠습니다.`, tail:'' },
-
-    { id:'q210',cat:'c14', q:'[자소서 5-1] 가장 열정을 쏟았던 활동은?', kw:'서브웨이/매니저', answers:['등록금을 위해 시작해 매니저로 인정받은 첫 아르바이트.'], fullAnswer:`'등록금을 위해 시작해, 매니저로 인정받은 첫 아르바이트'`, tail:'' },
-
-    { id:'q211',cat:'c14', q:'[자소서 5-2] 그 활동의 구체적 내용과 성과는?', kw:'주5일/주문빵썰기설거지/매니저발탁/1년근무', answers:['샌드위치 매장 주 5일 근무 — 점심 줄 서는 매장.','주문·빵 썰기·설거지·피크 자리 자진.','근무 외 시간 메뉴·작업 순서 반복 연습.','사장 신뢰 얻어 매니저 발탁, 1년간 근무하며 등록금 전액 마련.'], fullAnswer:`학기 등록금을 스스로 마련하겠다는 목표로 샌드위치 매장에서 주 5일 근무를 시작했습니다. 처음 접하는 브랜드인 데다 점심마다 문 밖까지 줄이 서는 곳이라 적응이 힘들었습니다. 하지만 할 수 있는 일부터 하나씩 더 맡고자 했습니다. 주문, 빵 썰기, 설거지까지 가능한 업무를 모두 맡아 처리했고, 피크시간에는 가장 바쁜 위치에 자진해 들어갔습니다. 근무 외 시간에도 메뉴와 작업 순서를 반복 연습하며 숙련도를 높였고, 그 결과 사장님의 신뢰를 얻어 매니저로 발탁되었습니다. 이후 1년간 근무를 이어가며 등록금을 전액 마련할 수 있었습니다.`, tail:'' },
-
-    { id:'q212',cat:'c14', q:'[자소서 5-3] 그 활동이 본인의 삶에 준 영향은?', kw:'재능보다태도/기준끌어올리기', answers:['결과를 만드는 것은 재능보다 태도.','주어진 만큼만 하지 않고 스스로 기준을 끌어올리는 습관.'], fullAnswer:`이 경험을 통해, 저는 결과를 만들기 위해 필요한 것은 재능보다 태도라는 것을 깨달았습니다. 강의가 끝나면 곧장 매장으로 출근했고 잠이 부족한 날이 늘며 쉬운 일을 찾아볼까 하는 생각이 들기도 했지만, 맡은 일을 끝까지 해내는 과정에서 스스로에 대한 기준이 높아졌습니다. 이후 어떤 일이든 주어진 만큼만 하는 것이 아니라 스스로 기준을 끌어올리는 습관이 자리잡게 되었습니다. 이러한 태도를 바탕으로 입행 이후에도 꾸준히 성과를 만들어내겠습니다.`, tail:'' },
-
-    // ── 직무관련 경험사항 ──
-    { id:'q213',cat:'c14', q:'[인턴] 산업은행 정책펀드금융실에서 한 일은?', kw:'운용사선정/출자사업/넥스트라운드', answers:['운용사 선정 지원 및 자료 조사.','정책펀드 출자사업 보조.','넥스트라운드 30여 개 스타트업 피칭 청취.','반도체·M&A 연수, LP별 출자사업 정리.'], fullAnswer:`한국산업은행 정책펀드금융실 인턴 (2025.05.26 ~ 2025.08.29)\n\n운용사 선정 지원 및 관련 자료 조사 등 정책펀드 출자사업 보조.\n\n넥스트라운드에 참여해 30여 개 스타트업의 피칭을 들으며 산업별 평가 기준의 차이를 학습. 반도체 공정·M&A 연수에 참가해 시장 트렌드를 파악하고, LP별 출자사업 정리와 기사 스크랩을 통해 정책 초점을 점검.`, tail:'' },
-
-    { id:'q214',cat:'c14', q:'[인턴] 신용보증기금 영업점에서 한 일은?', kw:'중기보증연장/조건변경/매출0원/PCOff', answers:['중소기업 보증 연장·갱신 관련 조건변경 업무.','매출 0원 사례 — 회계기준·사업특성 함께 점검.','법인등기·주주명부 대조로 실경영자 확인.','PC Off제 — 사전 준비·조기 납부 안내로 100여 건 차질 없이 연장.'], fullAnswer:`신용보증기금 영업점 인턴 (2024.09.04 ~ 2024.11.29)\n\n중소기업 보증 연장·갱신 관련 조건변경 업무 수행.\n\n숫자만으로 기업을 설명할 수 없다는 점을 배움. 매출 0원 기업도 회계 기준과 사업 특성을 함께 보고, 법인등기와 주주명부를 대조하며 실제 경영자를 확인. 이상이 보이면 대표와 직접 통화하거나 체납 여부까지 끝까지 점검.\n\nPC Off제로 마감 직전 보증료 납부가 몰리는 문제를, 오후 3시부터 서류 사전 준비·결재창 사전 노출·대표들께 조기 납부 문자 안내로 해결해 100여 개 업체 보증서를 차질 없이 연장.`, tail:'' },
-
-    { id:'q215',cat:'c14', q:'[활동] 희망이음 서포터즈 — 한 일과 성과는?', kw:'지역우수기업/구인미스매치/금상', answers:['지역 우수기업 탐방 후기 홍보 컨텐츠 제작.','구인 미스매치 해소 아이디어 제안.','경진대회에서 현황 분석·개선 방향 제안 — 금상 수상.'], fullAnswer:`희망이음 서포터즈 (2020.07.31 ~ 2021.02.17)\n\n지역 우수기업 탐방 후기 홍보 컨텐츠 및 개선 아이디어 제안. 지역 우수 기업 홍보 활동을 통해 구인 미스매치 해소.\n\n경진대회에서 현황 분석 및 개선 방향 제안하여 금상 수상.`, tail:'' },
-
-    { id:'q216',cat:'c14', q:'[활동] 기보 청년기술평가체험단 — 한 일은?', kw:'기술보증현장/대표면담/심사절차', answers:['중소기업 기술보증 현장 탐방·체험기 작성.','대표 면담 및 기술 검증 과정 동행.','신사업 모델 발표 청취, 기술보증 심사 절차 이해.'], fullAnswer:`기보 청년기술평가체험단 (2022.07.25 ~ 2022.09.08)\n\n중소기업 기술보증 현장 탐방 및 체험기 작성. 기술평가 현장에 동행하여 대표자 면담 및 기술 검증 과정 체험. 신사업 모델 발표 청취 및 기술보증 심사 절차 전반에 대한 이해.`, tail:'' },
-
-    { id:'q217',cat:'c14', q:'[활동] 신한은행 홍보대사 — 한 일은?', kw:'릴스/홍보캠페인/창구보조', answers:['시중은행 서비스 홍보 릴스 제작.','유명 관광지에서 홍보 캠페인.','내방 고객 응대·학생증 발급 등 창구 업무 보조.'], fullAnswer:`신한은행 홍보대사 (2022.08.09 ~ 2022.12.30)\n\n온·오프라인 홍보 활동 및 창구 업무 보조. 시중은행 서비스 홍보 릴스 제작 및 유명 관광지에서 홍보 캠페인 전개. 내방 고객 응대 및 학생증 발급 업무 지원 등 창구 업무 보조.`, tail:'' },
-
-    { id:'q218',cat:'c14', q:'[활동] 금감원 금융교육 봉사단 — 한 일은?', kw:'시니어디지털금융/QR간편결제', answers:['시니어 디지털 금융교육 보조 강사.','은행 앱 설치·회원가입·계좌조회·이체 실습 보조.','QR·간편결제 앱 사용법 실제 시연.'], fullAnswer:`금융감독원 금융교육 봉사단 (2022.08.23 ~ 2023.12.31)\n\n시니어 디지털 금융교육 보조 강사로 활동하여 수업 보조. 은행 앱 설치 및 회원 가입, 계좌조회, 이체 방법 등 기본 기능 중심 실습. QR코드 결제, 간편결제 앱 설치 및 사용법 등을 실제 시연하며 설명.`, tail:'' },
-
-    // ── 자소서 기반 공통 후속 질문 ──
-    { id:'q219',cat:'c14', q:'살면서 가장 기억에 남는 피드백은?', kw:'', answers:[], tail:'' },
-    { id:'q220',cat:'c14', q:'살면서 가장 힘들었던 순간과 극복은?', kw:'', answers:[], tail:'' },
-    { id:'q221',cat:'c14', q:'가장 큰 성취와 그 이유는?', kw:'', answers:[], tail:'' },
-    { id:'q222',cat:'c14', q:'실패 경험과 거기서 얻은 것은?', kw:'', answers:[], tail:'' },
-    { id:'q223',cat:'c14', q:'본인을 한 단어로 표현한다면?', kw:'', answers:[], tail:'' },
   ]
 };
 </script>
@@ -935,6 +948,7 @@ function isBrokenEmoji(s) {
   const defaultState = {
     questions: window.MM_DATA.questions.map(migrateQuestion),
     episodes: window.MM_DATA.episodes.map(ep => ({ ...ep, emoji: window.MM_DATA.EP_EMOJI[ep.id] || '' })),
+    experiences: (window.MM_DATA.experiences || []).map(ex => ({ ...ex, followups: (ex.followups || []).map(f => ({ ...f })) })),
     customNodes: [],
     customEdges: [],
     positions: {},
@@ -971,6 +985,9 @@ function isBrokenEmoji(s) {
           if (isBrokenEmoji(emoji)) emoji = '';
           return { ...ep, emoji };
         });
+      }
+      if (Array.isArray(saved.experiences)) {
+        state.experiences = saved.experiences.map(ex => ({ ...ex, followups: Array.isArray(ex.followups) ? ex.followups.map(f => ({ ...f })) : [] }));
       }
       if (saved.customNodes) state.customNodes = saved.customNodes;
       if (saved.customEdges) state.customEdges = saved.customEdges;
@@ -2013,6 +2030,7 @@ function MindmapView() {
           <button className="tab active">마인드맵</button>
           <button className="tab" onClick={()=>tabSwitch('table')}>리스트 뷰</button>
           <button className="tab" onClick={()=>tabSwitch('episode')}>에피소드 관리</button>
+          <button className="tab" onClick={()=>tabSwitch('experience')}>경험 관리</button>
         </div>
         <input id="search" className="search" placeholder="질문, 키워드, 답변 검색..."
                value={search} onChange={e=>setSearch(e.target.value)} />
@@ -3218,6 +3236,7 @@ function TableView() {
           <button className="tab" onClick={()=>tabSwitch('mindmap')}>마인드맵</button>
           <button className="tab active">리스트 뷰</button>
           <button className="tab" onClick={()=>tabSwitch('episode')}>에피소드 관리</button>
+          <button className="tab" onClick={()=>tabSwitch('experience')}>경험 관리</button>
         </div>
         <div className="tb-spacer"></div>
         <SyncIndicator />
@@ -3679,6 +3698,7 @@ function EpisodeManagerView() {
           <button className="tab" onClick={function(){tabSwitch('mindmap');}}>마인드맵</button>
           <button className="tab" onClick={function(){tabSwitch('table');}}>리스트 뷰</button>
           <button className="tab active">에피소드 관리</button>
+          <button className="tab" onClick={function(){tabSwitch('experience');}}>경험 관리</button>
         </div>
         <div className="tb-spacer"></div>
         <SyncIndicator />
@@ -3739,9 +3759,161 @@ function EpisodeManagerView() {
   );
 }
 
+// ─── ExperienceManagerView (경험 관리 탭) ───
+function ExperienceManagerView() {
+  var stState = React.useState(MMStore.get());
+  var state = stState[0]; var setState = stState[1];
+  var stFilter = React.useState('');
+  var filter = stFilter[0]; var setFilter = stFilter[1];
+  var stTypeFilter = React.useState('all');
+  var typeFilter = stTypeFilter[0]; var setTypeFilter = stTypeFilter[1];
+  var stCollapsed = React.useState({});
+  var collapsed = stCollapsed[0]; var setCollapsed = stCollapsed[1];
+
+  React.useEffect(function() { return MMStore.subscribe(function(s) { setState({...s}); }); }, []);
+
+  var tabSwitch = function(tab) { window.location.hash = '#' + tab; };
+  var experiences = state.experiences || [];
+
+  var updateExp = function(exId, mut) {
+    MMStore.update(function(s) {
+      var ex = (s.experiences||[]).find(function(e){return e.id===exId;});
+      if (ex) mut(ex);
+    });
+  };
+
+  var addExp = function() {
+    var newId = 'ex_' + Date.now().toString(36);
+    MMStore.update(function(s) {
+      s.experiences = s.experiences || [];
+      s.experiences.push({ id: newId, type: '활동', title: '새 경험', period: '', summary: '', body: '', followups: [] });
+    });
+  };
+
+  var removeExp = function(exId) {
+    if (!confirm('이 경험을 삭제할까요?')) return;
+    MMStore.update(function(s) { s.experiences = (s.experiences||[]).filter(function(e){return e.id!==exId;}); });
+  };
+
+  var addFollowup = function(exId) {
+    updateExp(exId, function(ex) {
+      ex.followups = ex.followups || [];
+      ex.followups.push({ id: 'fu_'+Date.now().toString(36), q: '', a: '' });
+    });
+  };
+
+  var updateFollowup = function(exId, fuId, field, value) {
+    updateExp(exId, function(ex) {
+      var fu = (ex.followups||[]).find(function(f){return f.id===fuId;});
+      if (fu) fu[field] = value;
+    });
+  };
+
+  var removeFollowup = function(exId, fuId) {
+    updateExp(exId, function(ex) { ex.followups = (ex.followups||[]).filter(function(f){return f.id!==fuId;}); });
+  };
+
+  var toggleBody = function(exId) {
+    setCollapsed(function(c) { var n = {...c}; n[exId] = !n[exId]; return n; });
+  };
+
+  var filtered = React.useMemo(function() {
+    var list = experiences;
+    if (typeFilter !== 'all') list = list.filter(function(ex){ return ex.type === typeFilter; });
+    if (!filter.trim()) return list;
+    var t = filter.toLowerCase();
+    return list.filter(function(ex) {
+      if ((ex.title||'').toLowerCase().includes(t)) return true;
+      if ((ex.summary||'').toLowerCase().includes(t)) return true;
+      if ((ex.body||'').toLowerCase().includes(t)) return true;
+      if ((ex.followups||[]).some(function(f){ return (f.q||'').toLowerCase().includes(t) || (f.a||'').toLowerCase().includes(t); })) return true;
+      return false;
+    });
+  }, [experiences, filter, typeFilter]);
+
+  var totalFu = experiences.reduce(function(s,ex){ return s + (ex.followups||[]).length; }, 0);
+
+  var types = ['all', '자소서', '인턴', '활동'];
+
+  return (
+    <>
+      <div className="topbar">
+        <div className="brand">면접 마인드맵</div>
+        <div className="tabs">
+          <button className="tab" onClick={function(){tabSwitch('mindmap');}}>마인드맵</button>
+          <button className="tab" onClick={function(){tabSwitch('table');}}>리스트 뷰</button>
+          <button className="tab" onClick={function(){tabSwitch('episode');}}>에피소드 관리</button>
+          <button className="tab active">경험 관리</button>
+        </div>
+        <div className="tb-spacer"></div>
+        <SyncIndicator />
+        <ThemeToggle />
+        <button className="btn primary" onClick={addExp}>+ 새 경험</button>
+      </div>
+
+      <div className="exp-wrap">
+        <div className="exp-toolbar">
+          <input className="search" style={{maxWidth:300}} placeholder="제목·본문·꼬리질문 검색..." value={filter} onChange={function(e){setFilter(e.target.value);}} />
+          <div className="tabs" style={{gap:4}}>
+            {types.map(function(t){ return (
+              <button key={t} className={'tab' + (typeFilter===t?' active':'')} style={{padding:'4px 10px',fontSize:11}} onClick={function(){setTypeFilter(t);}}>{t==='all'?'전체':t}</button>
+            ); })}
+          </div>
+          <div className="exp-stats">{filtered.length}/{experiences.length} · 꼬리질문 {totalFu}</div>
+        </div>
+
+        <div className="exp-grid">
+          {filtered.map(function(ex) {
+            var isCol = !!collapsed[ex.id];
+            return (
+              <div key={ex.id} className="exp-card">
+                <div className="exp-card-head">
+                  <span className="exp-type" data-type={ex.type}>{ex.type}</span>
+                  <input className="exp-title-input" value={ex.title || ''} onChange={function(e){ var v=e.target.value; updateExp(ex.id, function(x){x.title=v;}); }} />
+                  {ex.period && <span className="exp-period">{ex.period}</span>}
+                  <button className="exp-card-del" title="삭제" onClick={function(){removeExp(ex.id);}}>×</button>
+                </div>
+                {(ex.summary || ex.summary === '') && (
+                  <input className="exp-summary" placeholder="한 줄 요약 (선택)" value={ex.summary || ''} onChange={function(e){ var v=e.target.value; updateExp(ex.id, function(x){x.summary=v;}); }} style={{fontSize:12, fontFamily:'inherit'}} />
+                )}
+                <div className="exp-section-label">
+                  <span>자소서 본문 / 경험 내용</span>
+                  <button className="exp-toggle" onClick={function(){toggleBody(ex.id);}}>{isCol ? '펼치기' : '접기'}</button>
+                </div>
+                {!isCol && (
+                  <div className="exp-body" contentEditable suppressContentEditableWarning
+                    onBlur={function(e){ var v=e.currentTarget.innerText; updateExp(ex.id, function(x){x.body=v;}); }}>{ex.body || ''}</div>
+                )}
+                <div className="exp-section-label">
+                  <span>예상 꼬리질문</span>
+                  <span className="exp-fu-count">{(ex.followups||[]).length}</span>
+                </div>
+                <div className="exp-fu-list">
+                  {(ex.followups||[]).map(function(fu){ return (
+                    <div key={fu.id} className="exp-fu-item">
+                      <input className="exp-fu-q" placeholder="Q. 예상되는 꼬리질문" value={fu.q || ''} onChange={function(e){ updateFollowup(ex.id, fu.id, 'q', e.target.value); }} />
+                      <textarea className="exp-fu-a" placeholder="A. 답변 메모 (선택)" value={fu.a || ''} rows={2}
+                        onChange={function(e){ updateFollowup(ex.id, fu.id, 'a', e.target.value); var el=e.target; el.style.height='auto'; el.style.height=el.scrollHeight+'px'; }}
+                        ref={function(el){ if(el){ el.style.height='auto'; el.style.height=el.scrollHeight+'px'; } }} />
+                      <button className="exp-fu-del" title="삭제" onClick={function(){removeFollowup(ex.id, fu.id);}}>×</button>
+                    </div>
+                  ); })}
+                  <button className="exp-add-fu" onClick={function(){addFollowup(ex.id);}}>+ 꼬리질문 추가</button>
+                </div>
+              </div>
+            );
+          })}
+          {filtered.length === 0 && <div style={{padding:40, textAlign:'center', color:'var(--text3)', fontSize:13}}>일치하는 경험이 없습니다.</div>}
+        </div>
+      </div>
+    </>
+  );
+}
+
 window.MindmapView = MindmapView;
 window.TableView = TableView;
 window.EpisodeManagerView = EpisodeManagerView;
+window.ExperienceManagerView = ExperienceManagerView;
 
 const { useState, useEffect } = React;
 
@@ -3769,13 +3941,13 @@ ErrorBoundary.getDerivedStateFromError = function(err) { return { hasError: true
 
 var _scrollPos = {};
 function saveScroll(route) {
-  var sel = route === 'table' ? '.table-wrap' : route === 'episode' ? '.ep-wrap' : null;
+  var sel = route === 'table' ? '.table-wrap' : route === 'episode' ? '.ep-wrap' : route === 'experience' ? '.exp-wrap' : null;
   if (!sel) return;
   var el = document.querySelector(sel);
   if (el) _scrollPos[route] = el.scrollTop;
 }
 function restoreScroll(route) {
-  var sel = route === 'table' ? '.table-wrap' : route === 'episode' ? '.ep-wrap' : null;
+  var sel = route === 'table' ? '.table-wrap' : route === 'episode' ? '.ep-wrap' : route === 'experience' ? '.exp-wrap' : null;
   if (!sel || !_scrollPos[route]) return;
   var pos = _scrollPos[route];
   requestAnimationFrame(function() {
@@ -3816,6 +3988,7 @@ function App() {
   var view;
   if (route === 'table') view = <TableView />;
   else if (route === 'episode') view = <EpisodeManagerView />;
+  else if (route === 'experience') view = <ExperienceManagerView />;
   else view = <MindmapView />;
 
   return <>
