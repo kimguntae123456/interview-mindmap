@@ -512,6 +512,8 @@ html, body { height:100%; overflow:hidden; background:var(--bg); color:var(--tex
 .ep-script-block textarea { width: 100%; border: 1px solid var(--border); border-radius: 4px; padding: 6px 8px; font-size: 13px; line-height: 1.5; outline: none; background: var(--surface); resize: none; overflow: hidden; font-family: var(--font); color: var(--text); box-shadow: var(--shadow-inset); letter-spacing: 0.1px; min-height: 36px; }
 .ep-script-block .fmt-preview { width: 100%; border: 1px solid var(--border); border-radius: 4px; padding: 6px 8px; font-size: 13px; line-height: 1.5; outline: none; background: var(--surface); font-family: var(--font); color: var(--text); box-shadow: var(--shadow-inset); letter-spacing: 0.1px; min-height: 36px; }
 .ep-script-block textarea:focus { border-color: var(--text); }
+.ep-script-block[data-label="축약형"] { background: #e8f5e9; border-color: #66bb6a; }
+.ep-script-block[data-label="축약형"] .ep-script-label input { color: #2e7d32; font-weight: 600; }
 .ep-add-script { align-self: flex-start; font-size: 11px; font-weight: 500; padding: 3px 12px; border: 1px dashed var(--border); background: transparent; border-radius: 999px; cursor: pointer; color: var(--text2); font-family: var(--font); }
 .ep-add-script:hover { border-style: solid; color: var(--text); }
 .ep-card-foot { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--text3); flex-wrap: wrap; }
@@ -689,11 +691,12 @@ window.MM_DATA = {
     { id: 'ep10', tag: '영어쌤',            desc: '전환점' },
     { id: 'ep11', tag: '서손',              desc: '인쇄 실수' },
     { id: 'ep12', tag: '맛동산업무2배',     desc: '인턴 불공평' },
+    { id: 'ep13', tag: '악성민원인',        desc: '폭언 30분, 즉시 회복' },
   ],
   EP_EMOJI: {
     'ep1': '\u{1F96A}', 'ep2': '\u{1FAAA}', 'ep3': '\u{1F4F7}', 'ep4': '\u{1F6A8}', 'ep5': '\u{1F4E2}',
     'ep6': '\u{1F3DA}\uFE0F', 'ep7': '\u{1F4CA}', 'ep8': '\u{1F3AC}', 'ep9': '\u{1F3A4}', 'ep10': '\u{1F4DD}',
-    'ep11': '\u{1F5A8}\uFE0F', 'ep12': '\u{1F358}'
+    'ep11': '\u{1F5A8}\uFE0F', 'ep12': '\u{1F358}', 'ep13': '\u{1F4DE}'
   },
   experiences: [
     { id:'ex1', type:'\uC790\uC18C\uC11C', title:'\uBB38\uD56D1. \uC9C0\uC6D0\uB3D9\uAE30 & \uC131\uC7A5 \uBC29\uD5A5', period:'', summary:'\uC131\uC7A5 \uAE30\uD68C / \uD6C4\uAE30\uB2E8\uACC4 \uC2A4\uCF00\uC77C\uC5C5 \uC804\uBB38\uAC00', body:`[1-1] \uC0B0\uC5C5\uC740\uD589\uC5D0 \uC9C0\uC6D0\uD55C \uB3D9\uAE30\uB294? (\uD68C\uC0AC \uC120\uD0DD \uAE30\uC900 \uD3EC\uD568)\n\n\uC800\uB294 \uC131\uC7A5\uD560 \uAE30\uD68C\uAC00 \uB9CE\uC740 \uACF3\uC5D0\uC11C \uC77C\uD558\uACE0 \uC2F6\uC2B5\uB2C8\uB2E4.\n\n\uD559\uBD80 \uC2DC\uC808\uBD80\uD130 \uAE30\uC5C5\uC5D0 \uC790\uAE08\uC744 \uC5F0\uACB0\uD558\uB294 \uC77C\uC5D0 \uAD00\uC2EC\uC774 \uC788\uC5C8\uACE0, \uADF8 \uC5F0\uC7A5\uC120\uC5D0\uC11C \uB2F9\uD589 \uC778\uD134\uC5D0 \uC9C0\uC6D0\uD588\uC2B5\uB2C8\uB2E4. \uB2E4\uB9CC \uB2F9\uC2DC\uC5D0\uB294 \uC0B0\uC5C5\uC740\uD589\uC774 \uB2E4\uB978 \uAE08\uC735\uAE30\uAD00\uACFC \uC5B4\uB5BB\uAC8C \uB2E4\uB978\uC9C0\uAE4C\uC9C0\uB294 \uAE4A\uC774 \uC0DD\uAC01\uD574\uBCF4\uC9C0 \uBABB\uD588\uC2B5\uB2C8\uB2E4.\n\n\uC778\uD134 \uADFC\uBB34 \uC911 \uD300\uC7A5\uB2D8\uAED8 \uC0B0\uC5C5\uC740\uD589\uC758 \uD5A5\uD6C4 \uC804\uB9DD\uC744 \uC5EC\uCB64\uBCF8 \uC801\uC774 \uC788\uC2B5\uB2C8\uB2E4. "\uC0C8\uB85C\uC6B4 \uC704\uAE30\uAC00 \uACC4\uC18D \uC0DD\uAE30\uB294 \uD55C, \uD574\uC57C \uD560 \uC77C\uC740 \uB354\uC6B1 \uB9CE\uC544\uC9C8 \uAC83"\uC774\uB77C\uB294 \uB9D0\uC500\uC774 \uC624\uB798 \uB0A8\uC558\uC2B5\uB2C8\uB2E4. \uC0B0\uC5C5\uC740\uD589\uC740 \uC2DC\uC911\uC740\uD589\uC774\uB098 \uD0C0 \uAE30\uAD00\uC774 \uB300\uC2E0\uD560 \uC218 \uC5C6\uB294 \uC815\uCC45\uAE08\uC735\uC758 \uC5ED\uD560\uC744 \uB9E1\uC544\uC654\uACE0, \uADF8 \uC5ED\uD560\uC740 \uC2DC\uB300\uC5D0 \uB9DE\uCDB0 \uACC4\uC18D \uD655\uC7A5\uB418\uC5B4 \uC654\uC2B5\uB2C8\uB2E4. \uBA38\uBB3C\uB7EC \uC788\uC9C0 \uC54A\uB294 \uC870\uC9C1\uC774\uAE30\uC5D0 \uC804\uBB38\uC131\uC744 \uD0A4\uC6B8 \uAE30\uD68C\uB3C4 \uD568\uAED8 \uB298\uC5B4\uB09C\uB2E4\uB294 \uAC83\uC744 \uADF8\uB54C \uAE68\uB2EC\uC558\uC2B5\uB2C8\uB2E4.\n\n\uC120\uBC30\uB2D8\uB4E4\uACFC \uD568\uAED8 \uC77C\uD558\uBA70 \uADF8 \uAE68\uB2EC\uC74C\uC740 \uD655\uC2E0\uC774 \uB410\uC2B5\uB2C8\uB2E4. \uD55C \uC2A4\uD0C0\uD2B8\uC5C5\uC758 \uC131\uC7A5\uC744 \uC704\uD574 \uC5B4\uB5A4 \uBD80\uC11C\uB294 \uD22C\uC790\uC790\uC640 \uAE30\uC5C5\uC744 \uC5F0\uACB0\uD558\uACE0, \uB610 \uB2E4\uB978 \uBD80\uC11C\uB294 \uD380\uB4DC\uB97C \uC870\uC131\uD574 \uC790\uAE08\uC744 \uACF5\uAE09\uD588\uC2B5\uB2C8\uB2E4. \uAC01 \uBD80\uC11C\uC758 \uC5ED\uD560\uC740 \uB2EC\uB790\uC9C0\uB9CC \uBAA8\uB450\uAC00 \uAE30\uC5C5 \uC131\uC7A5\uC774\uB77C\uB294 \uD558\uB098\uC758 \uBAA9\uD45C\uB97C \uD5A5\uD574 \uC6C0\uC9C1\uC774\uACE0 \uC788\uC5C8\uC2B5\uB2C8\uB2E4. \uAD6C\uC131\uC6D0 \uBAA8\uB450\uAC00 \uAC01\uC790\uC758 \uC5ED\uD560\uC5D0 \uC790\uBD80\uC2EC\uC744 \uB290\uB07C\uBA70 \uCEE4\uB9AC\uC5B4\uB97C \uC313\uC544\uAC00\uB294 \uBAA8\uC2B5\uC740 \uD070 \uC601\uAC10\uC744 \uC8FC\uC5C8\uC2B5\uB2C8\uB2E4.\n\n\uC800 \uB610\uD55C \uBCC0\uD654\uC5D0 \uB9DE\uCDB0 \uC0C8\uB85C\uC6B4 \uC5ED\uD560\uC744 \uB9E1\uC544\uAC00\uBA70, \uC804\uBB38\uC131\uC744 \uD0A4\uC6B0\uB294 \uD589\uC6D0\uC774 \uB418\uACA0\uC2B5\uB2C8\uB2E4.\n\n\n[1-2] \uC785\uD589 \uD6C4 \uC5B4\uB5A4 \uBD84\uC57C\uC5D0\uC11C \uC5B4\uB5A4 \uC804\uBB38\uAC00\uB85C \uC131\uC7A5\uD558\uACE0 \uC2F6\uC740\uAC00?\n\n\uC800\uB294 \uD6C4\uAE30 \uB2E8\uACC4 \uAE30\uC5C5\uC758 \uC2A4\uCF00\uC77C\uC5C5\uC744 \uB4B7\uBC1B\uCE68\uD558\uB294 \uC804\uBB38\uAC00\uB85C \uC131\uC7A5\uD558\uACE0 \uC2F6\uC2B5\uB2C8\uB2E4.\n\n\uC6B0\uC218\uD55C \uAE30\uC5C5\uC870\uCC28 \uC131\uC7A5\uC758 \uB9C8\uC9C0\uB9C9 \uD55C \uAC78\uC74C\uC744 \uC55E\uB450\uACE0 \uD070 \uBCBD\uC5D0 \uBD80\uB52A\uD799\uB2C8\uB2E4. \uCD08\uAE30\uC640 \uB2EC\uB9AC, \uBCF8\uACA9\uC801\uC778 \uD655\uC7A5\uC744 \uC55E\uB454 \uAE30\uC5C5\uC740 \uB354 \uD070 \uC790\uAE08\uACFC \uD6C4\uC18D \uD22C\uC790\uAC00 \uB3D9\uC2DC\uC5D0 \uD544\uC694\uD574\uC9D1\uB2C8\uB2E4. \uADF8\uB7EC\uB098 \uD22C\uC790 \uADDC\uBAA8\uAC00 \uCEE4\uC9C8\uC218\uB85D \uCC38\uC5EC\uD560 \uC790\uAE08 \uC8FC\uCCB4\uAC00 \uC904\uC5B4, \uD55C \uBC88 \uD750\uB984\uC774 \uB04A\uAE30\uBA74 \uC131\uC7A5\uC138\uB3C4 \uB454\uD654\uB429\uB2C8\uB2E4. \uC774 \uACF5\uBC31\uC744 \uBA54\uC6B0\uB294 \uC77C\uC740 \uC0B0\uC5C5\uC740\uD589\uC5D0\uC11C\uB9CC \uD560 \uC218 \uC788\uACE0, \uADF8\uB9CC\uD07C \uB354 \uD070 \uBC30\uC6C0\uC744 \uC5BB\uC744 \uC218 \uC788\uB2E4\uACE0 \uC0DD\uAC01\uD569\uB2C8\uB2E4.\n\n\uC785\uD589 \uD6C4, \uAE30\uC5C5\uC744 \uD68D\uC77C\uC801\uC73C\uB85C \uC2EC\uC0AC\uD558\uC9C0 \uC54A\uACE0 \uD604\uC7AC \uB193\uC778 \uC131\uC7A5 \uAD6D\uBA74\uBD80\uD130 \uC77D\uC5B4\uB0B4\uACA0\uC2B5\uB2C8\uB2E4. \uAE30\uC5C5\uB9C8\uB2E4 \uB9C9\uD788\uB294 \uC9C0\uC810\uC774 \uB2E4\uB974\uBBC0\uB85C, \uC774\uB97C \uC815\uD655\uD788 \uAD6C\uBD84\uD574 \uC54C\uB9DE\uC740 \uC9C0\uC6D0\uBC29\uC2DD\uC744 \uC81C\uC548\uD558\uACA0\uC2B5\uB2C8\uB2E4. \uD2B9\uD788 \uD6C4\uAE30 \uB2E8\uACC4\uC5D0\uC11C\uB294 \uD604\uC7AC \uD544\uC694\uD55C \uC790\uAE08\uB9CC\uC774 \uC544\uB2C8\uB77C, \uB2E4\uC74C \uB77C\uC6B4\uB4DC\uB85C \uC774\uC5B4\uC9C8 \uAC00\uB2A5\uC131\uAE4C\uC9C0 \uD568\uAED8 \uC810\uAC80\uD558\uACA0\uC2B5\uB2C8\uB2E4.`, followups:[] },
@@ -900,6 +903,11 @@ window.MM_DATA = {
     ep10: { situation: '영어 선생님과의 전환점', action: '', result: '', takeaway: '' },
     ep11: { situation: '서손 인쇄 실수 사건', action: '', result: '', takeaway: '' },
     ep12: { situation: '맛동산업무2배 인턴 불공평 경험', action: '', result: '', takeaway: '' },
+    ep13: { situation: '인턴 중 악성민원인 폭언 30분 감내, 즉시 업무 복귀', action: '', result: '', takeaway: '',
+      scripts: [
+        { id: 'sc_brief', label: '축약형', content: `인턴 당시, **지점에서도 유명한 악성 민원인**의 전화를 당겨받은 경험이 있습니다. **"간첩이냐"** 같은 폭언을 30분 동안 들었지만, 끝나고 **바람을 쐬고 돌아와 바로 다음 업무를 이어갔습니다.** 오래 담아두지 않고 빠르게 털고 다음에 몰입하는 것이 제 강점이라고 생각합니다.` }
+      ]
+    },
   };
   function ensureShape(entry) {
     if (!entry) entry = {};
@@ -3559,7 +3567,7 @@ function EpisodeCard({ ep, stars, updateEp, removeEp, updateScripts, usageDetail
       <div className="ep-scripts">
         {scripts.map(function(sc, idx) {
           return (
-            <div className="ep-script-block" key={sc.id || idx}>
+            <div className="ep-script-block" key={sc.id || idx} data-label={sc.label || ''}>
               <div className="ep-script-label">
                 <input value={sc.label || ''} placeholder={'대본 ' + (idx+1)}
                        onChange={function(e){ updateScript(idx, 'label', e.target.value); }} />
